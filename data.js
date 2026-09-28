@@ -66,61 +66,61 @@ window.PORTAL_DATA = {
     {
       "id": "M1",
       "label": "Member 1",
-      "name": "",
+      "name": "Yasmin Mohamed",
       "role": "Chassis stream lead · Frame CAD"
     },
     {
       "id": "M2",
       "label": "Member 2",
-      "name": "",
+      "name": "Basmala Mohamed",
       "role": "Enclosure CAD & manufacturing drawings"
     },
     {
       "id": "M3",
       "label": "Member 3",
-      "name": "",
+      "name": "Ahmed Alattar",
       "role": "Drive-train CAD (wheels & caster)"
     },
     {
       "id": "M4",
       "label": "Member 4",
-      "name": "",
+      "name": "Youssef Wahba",
       "role": "Motor & encoder sizing"
     },
     {
       "id": "M5",
       "label": "Member 5",
-      "name": "",
+      "name": "Nada Ali",
       "role": "Procurement lead · Drive components"
     },
     {
       "id": "M6",
       "label": "Member 6",
-      "name": "",
+      "name": "Ahmed Elbrolosy",
       "role": "Procurement · Aluminum & workshops"
     },
     {
       "id": "M7",
       "label": "Member 7",
-      "name": "",
+      "name": "Saleh Nassar",
       "role": "Lift stream lead · CAD selection"
     },
     {
       "id": "M8",
       "label": "Member 8",
-      "name": "",
+      "name": "Nadine Elframawy",
       "role": "Lift CAD & integration"
     },
     {
       "id": "M9",
       "label": "Member 9",
-      "name": "",
+      "name": "Basant Salah",
       "role": "Lift materials"
     },
     {
       "id": "M10",
       "label": "Member 10",
-      "name": "",
+      "name": "Omar Farahat",
       "role": "Lift manufacturing & workshop deals"
     }
   ],

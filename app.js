@@ -143,7 +143,13 @@
   // lookups
   const memberById = (id) => data.members.find((m) => m.id === id) || { id: id, label: id, name: '', role: '' };
   const memberName = (m) => (m.name && m.name.trim()) || m.label || m.id;
-  const memberShort = (m) => (m.name && m.name.trim()) ? m.name.trim().split(/\s+/)[0] : m.id;
+  // Short chip label: first name, plus last-name initial when two members share a first name ("Ahmed A.").
+  function memberShort(m) {
+    const parts = (m.name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return m.id;
+    const clash = data.members.some((o) => o.id !== m.id && (o.name || '').trim().split(/\s+/)[0] === parts[0]);
+    return clash && parts.length > 1 ? parts[0] + ' ' + parts[parts.length - 1].charAt(0) + '.' : parts[0];
+  }
   const groupById = (id) => data.groups.find((g) => g.id === id) || { id: id, title: id, short: id, category: '' };
   const catById = (id) => data.categories.find((c) => c.id === id) || { id: id, name: id, hue: 'blue' };
   const hueOfTask = (t) => catById(groupById(t.group).category).hue || 'blue';
