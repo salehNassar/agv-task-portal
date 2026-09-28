@@ -37,57 +37,57 @@ Useful URL options: `?member=3` (personal view), `?view=timeline|schedule|team|b
 Milestones: **MS1 Mon Oct 12** draft CAD & research complete · **MS2 Mon Oct 19** design freeze & workshop deals locked · **MS3 Mon Oct 26** all materials procured · **MS4 Mon Nov 9** mechanical system assembled & tested.
 
 ### Weeks 1–2 · CAD & Research (Mon Sep 28 – Mon Oct 12)
-| Code | Task | Assigned (owner first) | Start | Deadline |
-|---|---|---|---|---|
-| 1.1 | Define chassis requirements & design envelope | M1, M2, M7 | Sep 28 | **Wed Sep 30** |
-| 2.1 | Replace omni wheels with differential layout (2 mid drive + front caster) | M3 | Sep 28 | **Thu Oct 1** |
-| 2.2 | Drive motor & encoder sizing | M4 | Sep 29 | **Sun Oct 4** |
-| 5.1 | Search for ready-made four-scissor lift CAD | M7, M8 | Sep 28 | **Mon Oct 5** |
-| 1.2 | Model the aluminum-profile frame | M1 | Sep 30 | **Thu Oct 8** |
-| 3.1 | Suppliers: motors, encoders, wheels & caster | M5, M4 | Oct 1 | **Thu Oct 8** |
-| 3.2 | Suppliers: aluminum profiles, sheets & connectors | M6 | Sep 30 | **Thu Oct 8** |
-| 5.2 | Shortlist & compare lift candidates | M8, M7 | Oct 3 | **Thu Oct 8** |
-| 1.3 | Model the 4-side aluminum-sheet enclosure | M2 | Oct 5 | **Mon Oct 12** |
-| 2.3 | Model motor, encoder, wheel & caster mounts | M3, M4 | Oct 3 | **Mon Oct 12** |
-| 3.3 | Workshop survey & quotations | M6, M10 | Oct 3 | **Mon Oct 12** |
-| 3.4 | Detailed pricing table v1 | M5, M6 | Oct 8 | **Mon Oct 12** |
-| 5.3 | Select lift model, verify & extract dimensions | M7, M8 | Oct 8 | **Mon Oct 12** |
-| 6.1 | Material selection study for the lift | M9, M10 | Oct 5 | **Mon Oct 12** |
+| Code | Task | Start | Deadline |
+|---|---|---|---|
+| 1.1 | Define chassis requirements & design envelope | Sep 28 | **Wed Sep 30** |
+| 2.1 | Replace omni wheels with differential layout (2 mid drive + front caster) | Sep 28 | **Thu Oct 1** |
+| 2.2 | Drive motor & encoder sizing | Sep 29 | **Sun Oct 4** |
+| 5.1 | Search for ready-made four-scissor lift CAD | Sep 28 | **Mon Oct 5** |
+| 1.2 | Model the aluminum-profile frame | Sep 30 | **Thu Oct 8** |
+| 3.1 | Suppliers: motors, encoders, wheels & caster | Oct 1 | **Thu Oct 8** |
+| 3.2 | Suppliers: aluminum profiles, sheets & connectors | Sep 30 | **Thu Oct 8** |
+| 5.2 | Shortlist & compare lift candidates | Oct 3 | **Thu Oct 8** |
+| 1.3 | Model the 4-side aluminum-sheet enclosure | Oct 5 | **Mon Oct 12** |
+| 2.3 | Model motor, encoder, wheel & caster mounts | Oct 3 | **Mon Oct 12** |
+| 3.3 | Workshop survey & quotations | Oct 3 | **Mon Oct 12** |
+| 3.4 | Detailed pricing table v1 | Oct 8 | **Mon Oct 12** |
+| 5.3 | Select lift model, verify & extract dimensions | Oct 8 | **Mon Oct 12** |
+| 6.1 | Material selection study for the lift | Oct 5 | **Mon Oct 12** |
 
 ### Week 3 · Design Freeze & Deals (Tue Oct 13 – Mon Oct 19)
-| Code | Task | Assigned | Start | Deadline |
-|---|---|---|---|---|
-| 1.4 | Frame structural check (FEA) | M1, M2 | Oct 13 | **Thu Oct 15** |
-| 2.4 | Stability & tip-over check (CG vs. 3-point support) | M3, M4 | Oct 13 | **Thu Oct 15** |
-| 3.5 | Final pricing table & budget approval | M5, M6 | Oct 13 | **Thu Oct 15** |
-| 5.4 | Finalize lift CAD & integrate into chassis | M8, M7, M1 | Oct 13 | **Thu Oct 15** |
-| 6.2 | Manufacturing method per lift part | M10, M9 | Oct 8 | **Thu Oct 15** |
-| 1.5 | Chassis design freeze & manufacturing drawings | M2, M1 | Oct 15 | **Mon Oct 19** |
-| 3.6 | Lock in workshop deals | M6, M10, M5 | Oct 16 | **Mon Oct 19** |
-| 6.3 | Finalize materials & lift manufacturing drawings | M9, M8 | Oct 13 | **Mon Oct 19** |
+| Code | Task | Start | Deadline |
+|---|---|---|---|
+| 1.4 | Frame structural check (FEA) | Oct 13 | **Thu Oct 15** |
+| 2.4 | Stability & tip-over check (CG vs. 3-point support) | Oct 13 | **Thu Oct 15** |
+| 3.5 | Final pricing table & budget approval | Oct 13 | **Thu Oct 15** |
+| 5.4 | Finalize lift CAD & integrate into chassis | Oct 13 | **Thu Oct 15** |
+| 6.2 | Manufacturing method per lift part | Oct 8 | **Thu Oct 15** |
+| 1.5 | Chassis design freeze & manufacturing drawings | Oct 15 | **Mon Oct 19** |
+| 3.6 | Lock in workshop deals | Oct 16 | **Mon Oct 19** |
+| 6.3 | Finalize materials & lift manufacturing drawings | Oct 13 | **Mon Oct 19** |
 
 ### Week 4 · Procurement (Tue Oct 20 – Mon Oct 26)
-| Code | Task | Assigned | Start | Deadline |
-|---|---|---|---|---|
-| 4.1 | Procure aluminum materials | M6, M3 | Oct 20 | **Thu Oct 22** |
-| 4.2 | Procure motors, encoders, wheels & caster | M5, M4 | Oct 20 | **Mon Oct 26** |
-| 4.3 | Incoming inspection & workshop hand-off | M2, M3 | Oct 24 | **Mon Oct 26** |
-| 7.1 | Procure lift materials & hardware | M9, M10 | Oct 20 | **Mon Oct 26** |
+| Code | Task | Start | Deadline |
+|---|---|---|---|
+| 4.1 | Procure aluminum materials | Oct 20 | **Thu Oct 22** |
+| 4.2 | Procure motors, encoders, wheels & caster | Oct 20 | **Mon Oct 26** |
+| 4.3 | Incoming inspection & workshop hand-off | Oct 24 | **Mon Oct 26** |
+| 7.1 | Procure lift materials & hardware | Oct 20 | **Mon Oct 26** |
 
 ### Weeks 5–6 · Fabrication, Assembly & Testing (Tue Oct 27 – Mon Nov 9)
-| Code | Task | Assigned | Start | Deadline |
-|---|---|---|---|---|
-| 4.4 | Cut & drill profiles; cut & bend sheets | M1, M2 | Oct 27 | **Sun Nov 1** |
-| 7.2 | Manufacture lift parts at the workshop | M10, M9 | Oct 27 | **Mon Nov 2** |
-| 4.5 | Frame assembly + drive-train installation | M3, M4, M1 | Nov 1 | **Thu Nov 5** |
-| 7.3 | Assemble the four-scissor lift | M7, M8 | Nov 2 | **Thu Nov 5** |
-| 4.6 | Enclosure sheet fitting | M2, M6 | Nov 4 | **Fri Nov 6** |
-| 7.4 | Mount the lift on the chassis | M7, M8, M9 | Nov 5 | **Sat Nov 7** |
-| 4.7 | Chassis initial mechanical tests | M4, M5, M3 | Nov 6 | **Mon Nov 9** |
-| 7.5 | Lift functional & load tests | M8, M10, M9 | Nov 7 | **Mon Nov 9** |
-| 7.6 | Mechanical test report & hand-over | M7, M1 | Nov 8 | **Mon Nov 9** |
+| Code | Task | Start | Deadline |
+|---|---|---|---|
+| 4.4 | Cut & drill profiles; cut & bend sheets | Oct 27 | **Sun Nov 1** |
+| 7.2 | Manufacture lift parts at the workshop | Oct 27 | **Mon Nov 2** |
+| 4.5 | Frame assembly + drive-train installation | Nov 1 | **Thu Nov 5** |
+| 7.3 | Assemble the four-scissor lift | Nov 2 | **Thu Nov 5** |
+| 4.6 | Enclosure sheet fitting | Nov 4 | **Fri Nov 6** |
+| 7.4 | Mount the lift on the chassis | Nov 5 | **Sat Nov 7** |
+| 4.7 | Chassis initial mechanical tests | Nov 6 | **Mon Nov 9** |
+| 7.5 | Lift functional & load tests | Nov 7 | **Mon Nov 9** |
+| 7.6 | Mechanical test report & hand-over | Nov 8 | **Mon Nov 9** |
 
-Full descriptions and deliverables for every task are in the portal (click any task).
+Tasks start **unassigned**. The team leader assigns them in admin mode (**Assign tasks** grid, or per task via **Edit task**). Full descriptions and deliverables are in the portal (click any task).
 
 ## Deploy for free on GitHub Pages (about 5 minutes)
 

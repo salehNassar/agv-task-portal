@@ -249,6 +249,7 @@
         ? '<span class="dirty">● Unpublished changes</span> (saved in this browser only). Export data.js and upload it to GitHub to publish.'
         : 'In sync with the published version.') + '</span>' +
       '<button class="btn btn-primary btn-sm" data-act="new">+ New task</button>' +
+      '<button class="btn btn-primary btn-sm" data-act="assign">Assign tasks</button>' +
       '<button class="btn btn-sm" data-act="export">Export data.js</button>' +
       '<button class="btn btn-sm" data-act="import">Import…</button>' +
       '<button class="btn btn-sm" data-act="settings">Project settings</button>' +
@@ -331,6 +332,7 @@
   }
 
   function chips(ids) {
+    if (!ids.length) return '<span class="chip unassigned">Unassigned</span>';
     return ids.map((id, i) => {
       const m = memberById(id);
       const cls = 'chip' + (i === 0 ? ' owner' : '') + (state.member === id ? ' me' : '');
@@ -447,7 +449,7 @@
           const due = dueInfo(t);
           const late = !!(due && due.late);
           const mine = state.member !== 'all' && t.assignees.includes(state.member);
-          const who = t.assignees.map((id) => memberShort(memberById(id))).join(', ');
+          const who = t.assignees.map((id) => memberShort(memberById(id))).join(', ') || 'Unassigned';
           body += '<div class="g-row g-task hue-' + esc(c.hue) + '" data-open="' + esc(t.id) + '" tabindex="0">' +
             '<div class="g-label"><span class="code">' + esc(t.code) + '</span><span class="t" title="' + esc(t.title) + '">' + esc(t.title) + '</span></div>' +
             '<div class="g-track"><div class="g-bar st-' + esc(t.status) + (late ? ' late' : '') + (mine ? ' me' : '') + '" style="left:' + x(t.start) + 'px;width:' + span(t.start, t.due) + 'px" title="' +
@@ -551,8 +553,9 @@
   // ---------------------------------------------------------------- modal
   const modal = $('#modal'), modalBody = $('#modalBody');
   let lastFocus = null;
-  function openModal(html) {
+  function openModal(html, wide) {
     lastFocus = document.activeElement;
+    $('.modal-card', modal).classList.toggle('wide', !!wide);
     modalBody.innerHTML = html;
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -596,6 +599,75 @@
       '</div></div>' +
       (isAdmin ? '<div class="modal-actions"><button class="btn btn-danger left" type="button" data-act="delete" data-id="' + esc(t.id) + '">Delete</button><button class="btn" type="button" data-act="duplicate" data-id="' + esc(t.id) + '">Duplicate</button><button class="btn btn-primary" type="button" data-act="edit" data-id="' + esc(t.id) + '">Edit task</button></div>' : '') +
       '</div>');
+  }
+
+  // Admin: assign every task in one grid (rows = tasks, columns = members). First assignee = owner.
+  function openAssign() {
+    const work = new Map(data.tasks.map((t) => [t.id, t.assignees.slice()]));
+    const ms = data.members;
+    let rows = '';
+    data.groups.forEach((g) => {
+      const ts = sortedTasks().filter((t) => t.group === g.id);
+      if (!ts.length) return;
+      rows += '<tr class="grp-row hue-' + esc(catById(g.category).hue) + '"><th colspan="' + (ms.length + 2) + '">' + esc(g.id + ' · ' + (g.short || g.title)) + '</th></tr>';
+      ts.forEach((t) => {
+        rows += '<tr data-task="' + esc(t.id) + '"><td class="t hue-' + esc(hueOfTask(t)) + '"><b class="code">' + esc(t.code) + '</b> ' + esc(t.title) + '<div class="small muted">due ' + esc(fmtShort(t.due)) + '</div></td>' +
+          ms.map((m) => '<td><input type="checkbox" data-m="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + ' aria-label="Assign ' + esc(t.code) + ' to ' + esc(memberName(m)) + '"></td>').join('') +
+          '<td><select data-owner aria-label="Owner of ' + esc(t.code) + '"></select></td></tr>';
+      });
+    });
+    openModal('<h2 id="modalTitle">Assign tasks</h2>' +
+      '<p class="muted small" style="margin-top:4px">Tick who works on each task. The <b>owner</b> is responsible for the deadline and the GitHub upload. Nothing changes until you click Save; then Export data.js to publish.</p>' +
+      '<div class="assign-wrap"><table class="assign"><thead><tr><th class="t">Task</th>' +
+      ms.map((m) => '<th title="' + esc(memberName(m)) + '">' + esc(memberShort(m)) + '</th>').join('') + '<th>Owner</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody><tfoot><tr><th class="t">Tasks per person</th>' + ms.map((m) => '<td data-load="' + esc(m.id) + '"></td>').join('') + '<td></td></tr></tfoot></table></div>' +
+      '<div class="modal-actions"><button class="btn left" type="button" id="assignClear">Clear all</button><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" type="button" id="assignSave">Save assignments</button></div>', true);
+
+    const table = $('.assign', modalBody);
+    const refreshRow = (tr) => {
+      const arr = work.get(tr.dataset.task), sel = $('[data-owner]', tr);
+      sel.innerHTML = arr.length ? arr.map((id) => '<option value="' + esc(id) + '">' + esc(memberShort(memberById(id))) + '</option>').join('') : '<option value="">—</option>';
+      sel.disabled = !arr.length;
+      if (arr.length) sel.value = arr[0];
+      $$('input[data-m]', tr).forEach((cb) => { cb.checked = arr.includes(cb.dataset.m); cb.parentElement.classList.toggle('is-owner', cb.dataset.m === arr[0]); });
+    };
+    const refreshLoad = () => ms.forEach((m) => {
+      const all = Array.from(work.values());
+      const n = all.filter((a) => a.includes(m.id)).length, own = all.filter((a) => a[0] === m.id).length;
+      $('[data-load="' + m.id + '"]', table).innerHTML = '<b>' + n + '</b>' + (own ? '<div class="small muted">' + own + ' own</div>' : '');
+    });
+    $$('tr[data-task]', table).forEach(refreshRow);
+    refreshLoad();
+
+    table.addEventListener('change', (e) => {
+      const tr = e.target.closest('tr[data-task]');
+      if (!tr) return;
+      let arr = work.get(tr.dataset.task);
+      if (e.target.matches('input[data-m]')) {
+        arr = arr.filter((id) => id !== e.target.dataset.m);
+        if (e.target.checked) arr.push(e.target.dataset.m);
+      } else if (e.target.matches('[data-owner]') && e.target.value) {
+        arr = [e.target.value].concat(arr.filter((id) => id !== e.target.value));
+      }
+      work.set(tr.dataset.task, arr);
+      refreshRow(tr);
+      refreshLoad();
+    });
+    $('#assignClear').addEventListener('click', () => {
+      work.forEach((_, id) => work.set(id, []));
+      $$('tr[data-task]', table).forEach(refreshRow);
+      refreshLoad();
+    });
+    $('#assignSave').addEventListener('click', () => {
+      let changed = 0;
+      data.tasks.forEach((t) => {
+        const next = work.get(t.id) || [];
+        if (next.join() !== t.assignees.join()) { t.assignees = next; changed++; }
+      });
+      closeModal();
+      if (changed) commit('Assignments saved for ' + changed + ' task' + (changed === 1 ? '' : 's'));
+      else toast('No changes');
+    });
   }
 
   function nextCode(groupId) {
@@ -837,6 +909,7 @@
       if (act === 'copy-folder') { const t = data.tasks.find((x) => x.id === id); if (t) copyText(taskFolder(t), 'Folder name copied'); }
       else if (act === 'copy-readme') copyText(data.github.readmeTemplate, 'README template copied');
       else if (act === 'new') openEditor(null);
+      else if (act === 'assign') openAssign();
       else if (act === 'edit') openEditor(id);
       else if (act === 'duplicate') {
         const src = data.tasks.find((x) => x.id === id);
