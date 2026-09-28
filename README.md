@@ -87,7 +87,7 @@ Milestones: **MS1 Mon Oct 12** draft CAD & research complete · **MS2 Mon Oct 19
 | 7.5 | Lift functional & load tests | Nov 7 | **Mon Nov 9** |
 | 7.6 | Mechanical test report & hand-over | Nov 8 | **Mon Nov 9** |
 
-Tasks start **unassigned**. The team leader assigns them in admin mode (**Assign tasks** grid, or per task via **Edit task**). Full descriptions and deliverables are in the portal (click any task).
+Tasks are grouped under **numbered members (Member 1–10)**, each with a balanced set of 6–8 tasks, and every task shows how many people it needs (👥). The team leader decides who is which number in admin mode (**Team** tab → pick the person for each number) and can change who works on what and how many people a task needs in the **Assign tasks** grid. Full descriptions and deliverables are in the portal (click any task).
 
 ## Deploy for free on GitHub Pages (about 5 minutes)
 

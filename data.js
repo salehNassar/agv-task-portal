@@ -66,62 +66,62 @@ window.PORTAL_DATA = {
     {
       "id": "M1",
       "label": "Member 1",
-      "name": "Yasmin Mohamed",
-      "role": ""
+      "name": "",
+      "role": "Chassis stream lead · Frame CAD"
     },
     {
       "id": "M2",
       "label": "Member 2",
-      "name": "Basmala Mohamed",
-      "role": ""
+      "name": "",
+      "role": "Enclosure CAD & manufacturing drawings"
     },
     {
       "id": "M3",
       "label": "Member 3",
-      "name": "Ahmed Alattar",
-      "role": ""
+      "name": "",
+      "role": "Drive-train CAD (wheels & caster)"
     },
     {
       "id": "M4",
       "label": "Member 4",
-      "name": "Youssef Wahba",
-      "role": ""
+      "name": "",
+      "role": "Motor & encoder sizing"
     },
     {
       "id": "M5",
       "label": "Member 5",
-      "name": "Nada Ali",
-      "role": ""
+      "name": "",
+      "role": "Procurement lead · Drive components"
     },
     {
       "id": "M6",
       "label": "Member 6",
-      "name": "Ahmed Elbrolosy",
-      "role": ""
+      "name": "",
+      "role": "Procurement · Aluminum & workshops"
     },
     {
       "id": "M7",
       "label": "Member 7",
-      "name": "Saleh Nassar",
-      "role": ""
+      "name": "",
+      "role": "Lift stream lead · CAD selection"
     },
     {
       "id": "M8",
       "label": "Member 8",
-      "name": "Nadine Elframawy",
-      "role": ""
+      "name": "",
+      "role": "Lift CAD & integration"
     },
     {
       "id": "M9",
       "label": "Member 9",
-      "name": "Basant Salah",
-      "role": ""
+      "name": "",
+      "role": "Lift materials"
     },
     {
       "id": "M10",
       "label": "Member 10",
-      "name": "Omar Farahat",
-      "role": ""
+      "name": "",
+      "role": "Lift manufacturing & workshop deals"
     }
   ],
   "categories": [
@@ -307,12 +307,17 @@ window.PORTAL_DATA = {
       "title": "Define chassis requirements & design envelope",
       "description": "Collect the inputs the new chassis must satisfy before modelling: overall footprint and height limit (rack/shelf clearance from GP1), 100 kg payload sizing basis, lift base-plate interface, battery/electronics bay, front & rear LiDAR mounting height, ground clearance. Agree on units, SolidWorks file structure and naming (one shared assembly).",
       "deliverable": "One-page requirements sheet + empty top-level SolidWorks assembly with reference planes",
-      "assignees": [],
+      "assignees": [
+        "M1",
+        "M2",
+        "M7"
+      ],
       "start": "2026-09-28",
       "due": "2026-09-30",
       "status": "todo",
       "priority": "high",
-      "folder": "T1_chassis-cad/1.1_define-chassis-requirements-and-design"
+      "folder": "T1_chassis-cad/1.1_define-chassis-requirements-and-design",
+      "needed": 3
     },
     {
       "id": "t1-2",
@@ -321,12 +326,15 @@ window.PORTAL_DATA = {
       "title": "Model the aluminum-profile frame",
       "description": "Build the frame from standard slotted aluminum extrusion profiles (e.g., 40×40 / 30×30, 8 mm slot) joined with standard corner brackets and T-nuts, so workshops only cut to length and drill. Include cross-members to carry the drive-motor mounts, the caster and the lift base plate. Use catalogue profile geometry from the supplier, not hand-drawn sections.",
       "deliverable": "Frame sub-assembly (.SLDASM) + preliminary cut list (profile, length, qty)",
-      "assignees": [],
+      "assignees": [
+        "M1"
+      ],
       "start": "2026-09-30",
       "due": "2026-10-08",
       "status": "todo",
       "priority": "high",
-      "folder": "T1_chassis-cad/1.2_model-the-aluminum-profile-frame"
+      "folder": "T1_chassis-cad/1.2_model-the-aluminum-profile-frame",
+      "needed": 1
     },
     {
       "id": "t1-3",
@@ -335,12 +343,15 @@ window.PORTAL_DATA = {
       "title": "Model the 4-side aluminum-sheet enclosure",
       "description": "Enclose the frame on all four sides with aluminum sheets (e.g., 1.5–2 mm), fixed to the profile slots with T-nuts/screws. Include: removable access panel(s) for battery & electronics, LiDAR windows at scanner height (front & rear), cable pass-throughs and ventilation openings. Use SolidWorks Sheet Metal so flat patterns can be exported.",
       "deliverable": "Enclosure parts (sheet metal) + flat-pattern DXFs (draft)",
-      "assignees": [],
+      "assignees": [
+        "M2"
+      ],
       "start": "2026-10-05",
       "due": "2026-10-12",
       "status": "todo",
       "priority": "normal",
-      "folder": "T1_chassis-cad/1.3_model-the-4-side-aluminum-sheet"
+      "folder": "T1_chassis-cad/1.3_model-the-4-side-aluminum-sheet",
+      "needed": 1
     },
     {
       "id": "t1-4",
@@ -349,12 +360,16 @@ window.PORTAL_DATA = {
       "title": "Frame structural check (FEA)",
       "description": "Static study of the frame under the 100 kg payload (with dynamic factor, as in the GP1 sizing basis) applied through the lift base-plate interface, supported at the two drive wheels and the caster. Report max stress, safety factor (target ≥ 1.5) and max deflection; stiffen the frame where needed.",
       "deliverable": "FEA summary slide (stress, SF, deflection) + any frame changes",
-      "assignees": [],
+      "assignees": [
+        "M1",
+        "M2"
+      ],
       "start": "2026-10-13",
       "due": "2026-10-15",
       "status": "todo",
       "priority": "high",
-      "folder": "T1_chassis-cad/1.4_frame-structural-check-fea"
+      "folder": "T1_chassis-cad/1.4_frame-structural-check-fea",
+      "needed": 2
     },
     {
       "id": "t1-5",
@@ -363,12 +378,16 @@ window.PORTAL_DATA = {
       "title": "Chassis design freeze & manufacturing drawings",
       "description": "Freeze the chassis assembly (frame + enclosure + drive train + lift interface). Produce the final profile cut list with drilling positions, sheet DXFs with bend lines, and a bill of materials for fasteners/brackets. After this date, changes go through the team leader only.",
       "deliverable": "Frozen assembly + drawing pack (PDF) + DXFs + BOM",
-      "assignees": [],
+      "assignees": [
+        "M2",
+        "M1"
+      ],
       "start": "2026-10-15",
       "due": "2026-10-19",
       "status": "todo",
       "priority": "high",
-      "folder": "T1_chassis-cad/1.5_chassis-design-freeze-and-manufacturing"
+      "folder": "T1_chassis-cad/1.5_chassis-design-freeze-and-manufacturing",
+      "needed": 2
     },
     {
       "id": "t2-1",
@@ -377,12 +396,15 @@ window.PORTAL_DATA = {
       "title": "Replace omni wheels with the differential layout",
       "description": "Delete the old omni/mecanum wheel assemblies from the CAD. Place two normal drive wheels at mid-length on a common axle line (each with its own motor + encoder) and one swivel caster at the front. Note: with this layout the robot steers by the speed difference between the two drive wheels; the caster is passive and only follows.",
       "deliverable": "Updated wheel layout in the chassis assembly + track width & wheelbase values",
-      "assignees": [],
+      "assignees": [
+        "M3"
+      ],
       "start": "2026-09-28",
       "due": "2026-10-01",
       "status": "todo",
       "priority": "high",
-      "folder": "T2_wheel-config/2.1_replace-omni-wheels"
+      "folder": "T2_wheel-config/2.1_replace-omni-wheels",
+      "needed": 1
     },
     {
       "id": "t2-2",
@@ -391,12 +413,15 @@ window.PORTAL_DATA = {
       "title": "Drive motor & encoder sizing",
       "description": "Calculate the required wheel torque and speed from: total mass (robot + 100 kg payload), target speed (e.g., 0.5 m/s), acceleration, rolling resistance, small floor thresholds and a safety factor. Output the motor spec to take to the market: rated torque (N·m), rpm after gearbox, voltage, encoder resolution (CPR), shaft size, and the wheel diameter/load rating.",
       "deliverable": "Motor + encoder + wheel specification sheet (input for 3.1)",
-      "assignees": [],
+      "assignees": [
+        "M4"
+      ],
       "start": "2026-09-29",
       "due": "2026-10-04",
       "status": "todo",
       "priority": "high",
-      "folder": "T2_wheel-config/2.2_drive-motor-and-encoder-sizing"
+      "folder": "T2_wheel-config/2.2_drive-motor-and-encoder-sizing",
+      "needed": 1
     },
     {
       "id": "t2-3",
@@ -405,12 +430,16 @@ window.PORTAL_DATA = {
       "title": "Model motor, encoder, wheel & caster mounts",
       "description": "Design the motor brackets, wheel hubs/couplings and caster mounting plate, attached to the profile frame. Use the real dimensions of the candidate motor/wheel from market research (download supplier CAD if available). Check wheel alignment and that both drive wheels touch the ground at the same height as the caster.",
       "deliverable": "Mount parts + updated assembly with candidate components",
-      "assignees": [],
+      "assignees": [
+        "M3",
+        "M4"
+      ],
       "start": "2026-10-03",
       "due": "2026-10-12",
       "status": "todo",
       "priority": "normal",
-      "folder": "T2_wheel-config/2.3_model-motor-encoder-wheel-and-caster"
+      "folder": "T2_wheel-config/2.3_model-motor-encoder-wheel-and-caster",
+      "needed": 2
     },
     {
       "id": "t2-4",
@@ -419,12 +448,16 @@ window.PORTAL_DATA = {
       "title": "Stability & tip-over check (CG vs. 3-point support)",
       "description": "With the drive wheels in the middle and only one front caster, the rear of the robot has no support. Check in CAD (Mass Properties) that the center of gravity, empty and with 100 kg raised on the lift, stays inside the support triangle (between the drive axle and the caster) during acceleration and braking. If it does not, propose a rear caster (common for middle-drive robots) and get the leader's decision before the design freeze.",
       "deliverable": "CG / tip-over check note + recommendation (keep 3-point or add rear caster)",
-      "assignees": [],
+      "assignees": [
+        "M3",
+        "M4"
+      ],
       "start": "2026-10-13",
       "due": "2026-10-15",
       "status": "todo",
       "priority": "high",
-      "folder": "T2_wheel-config/2.4_stability-and-tip-over-check-cg-vs-3"
+      "folder": "T2_wheel-config/2.4_stability-and-tip-over-check-cg-vs-3",
+      "needed": 2
     },
     {
       "id": "t3-1",
@@ -433,12 +466,16 @@ window.PORTAL_DATA = {
       "title": "Suppliers: motors, encoders, wheels & caster",
       "description": "Find at least 3 local/online sources for geared DC motors with encoders matching the spec from 2.2, drive wheels (diameter, load rating, hub/shaft fit) and a heavy-duty swivel caster. Record price, availability, lead time and datasheet link for each option.",
       "deliverable": "Supplier list (drive components) with datasheets",
-      "assignees": [],
+      "assignees": [
+        "M5",
+        "M4"
+      ],
       "start": "2026-10-01",
       "due": "2026-10-08",
       "status": "todo",
       "priority": "high",
-      "folder": "T3_market-research/3.1_suppliers-motors-encoders-wheels"
+      "folder": "T3_market-research/3.1_suppliers-motors-encoders-wheels",
+      "needed": 2
     },
     {
       "id": "t3-2",
@@ -447,12 +484,15 @@ window.PORTAL_DATA = {
       "title": "Suppliers: aluminum profiles, sheets & connectors",
       "description": "Find suppliers for aluminum extrusion profiles (sizes used in 1.2), aluminum sheets (thickness/grade from 1.3), corner brackets, T-nuts, end caps and fasteners. Ask whether they cut profiles to length and what the cutting tolerance and price per cut are.",
       "deliverable": "Supplier list (aluminum materials) with prices per meter / per sheet",
-      "assignees": [],
+      "assignees": [
+        "M6"
+      ],
       "start": "2026-09-30",
       "due": "2026-10-08",
       "status": "todo",
       "priority": "high",
-      "folder": "T3_market-research/3.2_suppliers-aluminum-profiles-sheets"
+      "folder": "T3_market-research/3.2_suppliers-aluminum-profiles-sheets",
+      "needed": 1
     },
     {
       "id": "t3-3",
@@ -461,12 +501,16 @@ window.PORTAL_DATA = {
       "title": "Workshop survey & quotations",
       "description": "Visit or call workshops for: profile cutting & drilling, sheet laser cutting & bending, CNC/lathe work (pins, shafts, couplings) and the lift parts. Ask for price, lead time, required file formats (DXF/STEP/PDF) and tolerances. Aim for 2–3 quotations per process.",
       "deliverable": "Workshop comparison (process, price, lead time, contact)",
-      "assignees": [],
+      "assignees": [
+        "M6",
+        "M10"
+      ],
       "start": "2026-10-03",
       "due": "2026-10-12",
       "status": "todo",
       "priority": "high",
-      "folder": "T3_market-research/3.3_workshop-survey-and-quotations"
+      "folder": "T3_market-research/3.3_workshop-survey-and-quotations",
+      "needed": 2
     },
     {
       "id": "t3-4",
@@ -475,12 +519,16 @@ window.PORTAL_DATA = {
       "title": "Detailed pricing table v1",
       "description": "Merge 3.1–3.3 into one pricing table. Columns: Item · Specification · Qty · Supplier (3 options) · Unit price (EGP) · Total · Lead time · Contact · Notes. Add a 10–15% contingency line and highlight the recommended option per item.",
       "deliverable": "Pricing table v1 (shared spreadsheet)",
-      "assignees": [],
+      "assignees": [
+        "M5",
+        "M6"
+      ],
       "start": "2026-10-08",
       "due": "2026-10-12",
       "status": "todo",
       "priority": "high",
-      "folder": "T3_market-research/3.4_detailed-pricing-table-v1"
+      "folder": "T3_market-research/3.4_detailed-pricing-table-v1",
+      "needed": 2
     },
     {
       "id": "t3-5",
@@ -489,12 +537,16 @@ window.PORTAL_DATA = {
       "title": "Final pricing table & budget approval",
       "description": "Update quantities from the frozen CAD (1.5, 6.3), add lift items, confirm prices, and present the total budget to the team leader for approval.",
       "deliverable": "Approved final pricing table + total budget",
-      "assignees": [],
+      "assignees": [
+        "M5",
+        "M6"
+      ],
       "start": "2026-10-13",
       "due": "2026-10-15",
       "status": "todo",
       "priority": "high",
-      "folder": "T3_market-research/3.5_final-pricing-table-and-budget-approval"
+      "folder": "T3_market-research/3.5_final-pricing-table-and-budget-approval",
+      "needed": 2
     },
     {
       "id": "t3-6",
@@ -503,12 +555,17 @@ window.PORTAL_DATA = {
       "title": "Lock in workshop deals",
       "description": "Confirm the selected workshops for chassis and lift parts: agreed price, delivery date (must fit Weeks 5–6), payment terms and the drawing formats they need. Book the manufacturing slots.",
       "deliverable": "Confirmed workshop list with agreed prices and delivery dates",
-      "assignees": [],
+      "assignees": [
+        "M6",
+        "M10",
+        "M5"
+      ],
       "start": "2026-10-16",
       "due": "2026-10-19",
       "status": "todo",
       "priority": "high",
-      "folder": "T3_market-research/3.6_lock-in-workshop-deals"
+      "folder": "T3_market-research/3.6_lock-in-workshop-deals",
+      "needed": 3
     },
     {
       "id": "t4-1",
@@ -517,12 +574,16 @@ window.PORTAL_DATA = {
       "title": "Procure aluminum materials",
       "description": "Buy aluminum profiles (cut to length if the supplier offers it), sheets, corner brackets, T-nuts and fasteners according to the approved pricing table. Keep all receipts for the budget record.",
       "deliverable": "All chassis materials received + receipts",
-      "assignees": [],
+      "assignees": [
+        "M6",
+        "M3"
+      ],
       "start": "2026-10-20",
       "due": "2026-10-22",
       "status": "todo",
       "priority": "high",
-      "folder": "T4_chassis-fabrication/4.1_procure-aluminum-materials"
+      "folder": "T4_chassis-fabrication/4.1_procure-aluminum-materials",
+      "needed": 2
     },
     {
       "id": "t4-2",
@@ -531,12 +592,16 @@ window.PORTAL_DATA = {
       "title": "Procure motors, encoders, wheels & caster",
       "description": "Buy the 2 drive motors with encoders, 2 drive wheels (+ hubs/couplings) and the caster(s). Check each motor spins and each encoder gives a signal on the bench before accepting.",
       "deliverable": "Drive components received and bench-checked",
-      "assignees": [],
+      "assignees": [
+        "M5",
+        "M4"
+      ],
       "start": "2026-10-20",
       "due": "2026-10-26",
       "status": "todo",
       "priority": "high",
-      "folder": "T4_chassis-fabrication/4.2_procure-motors-encoders-wheels"
+      "folder": "T4_chassis-fabrication/4.2_procure-motors-encoders-wheels",
+      "needed": 2
     },
     {
       "id": "t4-3",
@@ -545,12 +610,16 @@ window.PORTAL_DATA = {
       "title": "Incoming inspection & workshop hand-off",
       "description": "Check delivered materials against the BOM (dimensions, quantities, sheet thickness). Deliver material + drawing pack (PDF, DXF) to the workshops and confirm the start date.",
       "deliverable": "Signed-off checklist; workshops have material + drawings",
-      "assignees": [],
+      "assignees": [
+        "M2",
+        "M3"
+      ],
       "start": "2026-10-24",
       "due": "2026-10-26",
       "status": "todo",
       "priority": "normal",
-      "folder": "T4_chassis-fabrication/4.3_incoming-inspection-and-workshop-hand"
+      "folder": "T4_chassis-fabrication/4.3_incoming-inspection-and-workshop-hand",
+      "needed": 2
     },
     {
       "id": "t4-4",
@@ -559,12 +628,16 @@ window.PORTAL_DATA = {
       "title": "Cut & drill profiles; cut & bend sheets",
       "description": "Follow up the workshop: profile cutting and drilling, sheet laser cutting and bending. Check the first parts against the drawings before the full batch is made.",
       "deliverable": "All chassis parts manufactured and checked",
-      "assignees": [],
+      "assignees": [
+        "M1",
+        "M2"
+      ],
       "start": "2026-10-27",
       "due": "2026-11-01",
       "status": "todo",
       "priority": "high",
-      "folder": "T4_chassis-fabrication/4.4_cut-and-drill-profiles-cut-and-bend"
+      "folder": "T4_chassis-fabrication/4.4_cut-and-drill-profiles-cut-and-bend",
+      "needed": 2
     },
     {
       "id": "t4-5",
@@ -573,12 +646,17 @@ window.PORTAL_DATA = {
       "title": "Frame assembly + drive-train installation",
       "description": "Assemble the profile frame (check squareness with diagonals), then install the motor brackets, motors, encoders, drive wheels and caster. Check both drive wheels are parallel and at equal height.",
       "deliverable": "Rolling chassis",
-      "assignees": [],
+      "assignees": [
+        "M3",
+        "M4",
+        "M1"
+      ],
       "start": "2026-11-01",
       "due": "2026-11-05",
       "status": "todo",
       "priority": "high",
-      "folder": "T4_chassis-fabrication/4.5_frame-assembly-drive-train-installation"
+      "folder": "T4_chassis-fabrication/4.5_frame-assembly-drive-train-installation",
+      "needed": 3
     },
     {
       "id": "t4-6",
@@ -587,12 +665,16 @@ window.PORTAL_DATA = {
       "title": "Enclosure sheet fitting",
       "description": "Fit the four aluminum side sheets and access panels; check the LiDAR windows and cable pass-throughs line up; deburr all edges.",
       "deliverable": "Enclosed chassis",
-      "assignees": [],
+      "assignees": [
+        "M2",
+        "M6"
+      ],
       "start": "2026-11-04",
       "due": "2026-11-06",
       "status": "todo",
       "priority": "normal",
-      "folder": "T4_chassis-fabrication/4.6_enclosure-sheet-fitting"
+      "folder": "T4_chassis-fabrication/4.6_enclosure-sheet-fitting",
+      "needed": 2
     },
     {
       "id": "t4-7",
@@ -601,12 +683,17 @@ window.PORTAL_DATA = {
       "title": "Chassis initial mechanical tests",
       "description": "Push/roll test (straight-line drift), turning check, encoder read-out while rotating the wheels, static load test with 100 kg on the frame (measure deflection), and tip-over check with the load at the rear edge.",
       "deliverable": "Chassis test sheet with measured results + photos",
-      "assignees": [],
+      "assignees": [
+        "M4",
+        "M5",
+        "M3"
+      ],
       "start": "2026-11-06",
       "due": "2026-11-09",
       "status": "todo",
       "priority": "high",
-      "folder": "T4_chassis-fabrication/4.7_chassis-initial-mechanical-tests"
+      "folder": "T4_chassis-fabrication/4.7_chassis-initial-mechanical-tests",
+      "needed": 3
     },
     {
       "id": "t5-1",
@@ -615,12 +702,16 @@ window.PORTAL_DATA = {
       "title": "Search for ready-made four-scissor lift CAD",
       "description": "Search GrabCAD, TraceParts, 3D ContentCentral, Onshape public documents and papers/datasheets of commercial jacking/lifting AGVs for a four-scissor lift that is a proven design, preferably one already used in a real robot. Prefer native SolidWorks or STEP files with complete part geometry (not surface-only meshes).",
       "deliverable": "Long list of 5+ candidate models with links and source",
-      "assignees": [],
+      "assignees": [
+        "M7",
+        "M8"
+      ],
       "start": "2026-09-28",
       "due": "2026-10-05",
       "status": "todo",
       "priority": "high",
-      "folder": "T5_lift-cad/5.1_search-for-ready-made-four-scissor-lift"
+      "folder": "T5_lift-cad/5.1_search-for-ready-made-four-scissor-lift",
+      "needed": 2
     },
     {
       "id": "t5-2",
@@ -629,12 +720,16 @@ window.PORTAL_DATA = {
       "title": "Shortlist & compare candidates",
       "description": "Compare the best 3 against our requirements: fits inside the new chassis footprint, collapsed height, lift stroke (shelf clearance), rated for the 100 kg payload, actuator type available locally (lead screw / linear actuator), and evidence it has been built and used before.",
       "deliverable": "Comparison matrix with scores + recommended model",
-      "assignees": [],
+      "assignees": [
+        "M8",
+        "M7"
+      ],
       "start": "2026-10-03",
       "due": "2026-10-08",
       "status": "todo",
       "priority": "high",
-      "folder": "T5_lift-cad/5.2_shortlist-and-compare-candidates"
+      "folder": "T5_lift-cad/5.2_shortlist-and-compare-candidates",
+      "needed": 2
     },
     {
       "id": "t5-3",
@@ -643,12 +738,16 @@ window.PORTAL_DATA = {
       "title": "Select model, verify & extract dimensions",
       "description": "Open the selected model in SolidWorks, check it is complete and dimensionally consistent (move the mechanism through its full stroke, check interferences). Extract the key dimensions: arm length, pivot spacing, pin diameters, collapsed/extended height, actuator stroke and force.",
       "deliverable": "Verified lift model + key-dimension sheet",
-      "assignees": [],
+      "assignees": [
+        "M7",
+        "M8"
+      ],
       "start": "2026-10-08",
       "due": "2026-10-12",
       "status": "todo",
       "priority": "high",
-      "folder": "T5_lift-cad/5.3_select-model-verify-and-extract"
+      "folder": "T5_lift-cad/5.3_select-model-verify-and-extract",
+      "needed": 2
     },
     {
       "id": "t5-4",
@@ -657,12 +756,17 @@ window.PORTAL_DATA = {
       "title": "Finalize lift CAD & integrate into chassis",
       "description": "Scale/adapt the lift to our payload platform if needed (without changing proven ratios), then mate it into the chassis assembly. Check clearances to the frame, drive train, wiring and enclosure through the whole stroke.",
       "deliverable": "Final lift sub-assembly integrated in the chassis assembly",
-      "assignees": [],
+      "assignees": [
+        "M8",
+        "M7",
+        "M1"
+      ],
       "start": "2026-10-13",
       "due": "2026-10-15",
       "status": "todo",
       "priority": "high",
-      "folder": "T5_lift-cad/5.4_finalize-lift-cad-and-integrate-into"
+      "folder": "T5_lift-cad/5.4_finalize-lift-cad-and-integrate-into",
+      "needed": 3
     },
     {
       "id": "t6-1",
@@ -671,12 +775,16 @@ window.PORTAL_DATA = {
       "title": "Material selection study for the lift",
       "description": "Choose materials per part: arms (Al 6061-T6 as in GP1 vs. mild steel: strength, weight, cost, local availability), pins (hardened steel), bushings/bearings (bronze bushings vs. flanged ball bearings), platform and base plates. Check the arm and pin safety factors (target ≥ 1.5) with the selected material.",
       "deliverable": "Material table per part with justification",
-      "assignees": [],
+      "assignees": [
+        "M9",
+        "M10"
+      ],
       "start": "2026-10-05",
       "due": "2026-10-12",
       "status": "todo",
       "priority": "high",
-      "folder": "T6_lift-materials-and-mfg/6.1_material-selection-study-for-the-lift"
+      "folder": "T6_lift-materials-and-mfg/6.1_material-selection-study-for-the-lift",
+      "needed": 2
     },
     {
       "id": "t6-2",
@@ -685,12 +793,16 @@ window.PORTAL_DATA = {
       "title": "Manufacturing method per lift part",
       "description": "Define how each part will be made: laser/water-jet cutting of arms from plate, drilling and reaming pivot holes (tolerance for free rotation), turning of pins and spacers, welding or bolting of the frames, and the actuator (lead screw + nut vs. ready linear actuator). Confirm the chosen workshops can do each process.",
       "deliverable": "Process plan (part → process → workshop)",
-      "assignees": [],
+      "assignees": [
+        "M10",
+        "M9"
+      ],
       "start": "2026-10-08",
       "due": "2026-10-15",
       "status": "todo",
       "priority": "normal",
-      "folder": "T6_lift-materials-and-mfg/6.2_manufacturing-method-per-lift-part"
+      "folder": "T6_lift-materials-and-mfg/6.2_manufacturing-method-per-lift-part",
+      "needed": 2
     },
     {
       "id": "t6-3",
@@ -699,12 +811,16 @@ window.PORTAL_DATA = {
       "title": "Finalize materials & lift manufacturing drawings",
       "description": "Lock the material list and produce manufacturing drawings for every custom lift part (dimensions, tolerances on pivot holes, material, quantity) plus DXFs for cut parts.",
       "deliverable": "Lift drawing pack (PDF + DXF) + final lift BOM",
-      "assignees": [],
+      "assignees": [
+        "M9",
+        "M8"
+      ],
       "start": "2026-10-13",
       "due": "2026-10-19",
       "status": "todo",
       "priority": "high",
-      "folder": "T6_lift-materials-and-mfg/6.3_finalize-materials-and-lift"
+      "folder": "T6_lift-materials-and-mfg/6.3_finalize-materials-and-lift",
+      "needed": 2
     },
     {
       "id": "t7-1",
@@ -713,12 +829,16 @@ window.PORTAL_DATA = {
       "title": "Procure lift materials & hardware",
       "description": "Buy plate/bar stock, pins, bushings/bearings, lead screws + nuts (or linear actuator), couplings and fasteners from the approved pricing table.",
       "deliverable": "All lift materials and hardware received",
-      "assignees": [],
+      "assignees": [
+        "M9",
+        "M10"
+      ],
       "start": "2026-10-20",
       "due": "2026-10-26",
       "status": "todo",
       "priority": "high",
-      "folder": "T7_lift-fabrication/7.1_procure-lift-materials-and-hardware"
+      "folder": "T7_lift-fabrication/7.1_procure-lift-materials-and-hardware",
+      "needed": 2
     },
     {
       "id": "t7-2",
@@ -727,12 +847,16 @@ window.PORTAL_DATA = {
       "title": "Manufacture lift parts at the workshop",
       "description": "Follow up the workshop: cutting of arms and plates, hole reaming, pin turning. Check first-off parts (especially pivot hole spacing, which sets the lift geometry) before the full batch.",
       "deliverable": "All lift parts manufactured and checked",
-      "assignees": [],
+      "assignees": [
+        "M10",
+        "M9"
+      ],
       "start": "2026-10-27",
       "due": "2026-11-02",
       "status": "todo",
       "priority": "high",
-      "folder": "T7_lift-fabrication/7.2_manufacture-lift-parts-at-the-workshop"
+      "folder": "T7_lift-fabrication/7.2_manufacture-lift-parts-at-the-workshop",
+      "needed": 2
     },
     {
       "id": "t7-3",
@@ -741,12 +865,16 @@ window.PORTAL_DATA = {
       "title": "Assemble the four-scissor lift",
       "description": "Assemble the scissor pairs, pins and bushings, then the actuator(s). Check free motion by hand through the full stroke before powering anything.",
       "deliverable": "Assembled lift (bench)",
-      "assignees": [],
+      "assignees": [
+        "M7",
+        "M8"
+      ],
       "start": "2026-11-02",
       "due": "2026-11-05",
       "status": "todo",
       "priority": "high",
-      "folder": "T7_lift-fabrication/7.3_assemble-the-four-scissor-lift"
+      "folder": "T7_lift-fabrication/7.3_assemble-the-four-scissor-lift",
+      "needed": 2
     },
     {
       "id": "t7-4",
@@ -755,12 +883,17 @@ window.PORTAL_DATA = {
       "title": "Mount the lift on the chassis",
       "description": "Mount the lift base on the chassis frame at the CAD position; check clearances through the full stroke and that the platform is level.",
       "deliverable": "Lift mounted on chassis",
-      "assignees": [],
+      "assignees": [
+        "M7",
+        "M8",
+        "M9"
+      ],
       "start": "2026-11-05",
       "due": "2026-11-07",
       "status": "todo",
       "priority": "normal",
-      "folder": "T7_lift-fabrication/7.4_mount-the-lift-on-the-chassis"
+      "folder": "T7_lift-fabrication/7.4_mount-the-lift-on-the-chassis",
+      "needed": 3
     },
     {
       "id": "t7-5",
@@ -769,12 +902,17 @@ window.PORTAL_DATA = {
       "title": "Lift functional & load tests",
       "description": "Full stroke up/down unloaded, then stepped loads (e.g., 25 → 50 → 100 kg). Measure stroke, platform levelness, synchronization between actuators and whether the lift holds position at power-off. Inspect pins and bushings after the test.",
       "deliverable": "Lift test sheet with measured results + video",
-      "assignees": [],
+      "assignees": [
+        "M8",
+        "M10",
+        "M9"
+      ],
       "start": "2026-11-07",
       "due": "2026-11-09",
       "status": "todo",
       "priority": "high",
-      "folder": "T7_lift-fabrication/7.5_lift-functional-and-load-tests"
+      "folder": "T7_lift-fabrication/7.5_lift-functional-and-load-tests",
+      "needed": 3
     },
     {
       "id": "t7-6",
@@ -783,12 +921,28 @@ window.PORTAL_DATA = {
       "title": "Mechanical test report & hand-over",
       "description": "Combine the chassis and lift test results, open issues and photos into a short report and hand the mechanical platform over to the electrical and software teams.",
       "deliverable": "Mechanical phase test report (PDF)",
-      "assignees": [],
+      "assignees": [
+        "M7",
+        "M1"
+      ],
       "start": "2026-11-08",
       "due": "2026-11-09",
       "status": "todo",
       "priority": "high",
-      "folder": "T7_lift-fabrication/7.6_mechanical-test-report-and-hand-over"
+      "folder": "T7_lift-fabrication/7.6_mechanical-test-report-and-hand-over",
+      "needed": 2
     }
+  ],
+  "roster": [
+    "Yasmin Mohamed",
+    "Basmala Mohamed",
+    "Ahmed Alattar",
+    "Youssef Wahba",
+    "Nada Ali",
+    "Ahmed Elbrolosy",
+    "Saleh Nassar",
+    "Nadine Elframawy",
+    "Basant Salah",
+    "Omar Farahat"
   ]
 };

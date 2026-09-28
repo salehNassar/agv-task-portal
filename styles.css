@@ -411,7 +411,7 @@ table.sched { width: 100%; border-collapse: collapse; font-size: 13px; }
 .member li .d { color: var(--muted); font-size: 12px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .member-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
 .member-edit { display: grid; grid-template-columns: 1fr; gap: 6px; }
-.member-edit input { border: 1px solid var(--border); background: var(--surface-2); border-radius: 7px; padding: 5px 8px; font-size: 13px; width: 100%; }
+.member-edit input, .member-edit select { border: 1px solid var(--border); background: var(--surface-2); border-radius: 7px; padding: 5px 8px; font-size: 13px; width: 100%; }
 
 /* ================= Modal ================= */
 .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; }
@@ -435,6 +435,11 @@ table.assign { border-collapse: separate; border-spacing: 0; font-size: 13px; wi
 .assign td.is-owner { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
 .assign select { font-size: 12px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); max-width: 110px; }
 .assign tbody tr:hover td { background: var(--surface-2); }
+.assign td.need { white-space: nowrap; }
+.assign td.need input { width: 46px; padding: 3px 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); text-align: center; }
+.assign .gap { display: inline-block; min-width: 44px; margin-left: 6px; font-size: 11px; font-weight: 700; text-align: left; }
+.assign .gap.ok { color: var(--done); }
+.assign .gap.off { color: var(--warn); }
 .assign tbody tr:hover td.is-owner { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
 .modal h2 { font-size: 19px; padding-right: 36px; }
 .detail-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; margin-bottom: 6px; }

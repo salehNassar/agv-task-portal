@@ -88,6 +88,8 @@
     d.phases = d.phases || [];
     d.milestones = d.milestones || [];
     d.tasks = (d.tasks || []).map((t) => Object.assign({ assignees: [], status: 'todo', priority: 'normal', description: '', deliverable: '', docLink: '' }, t));
+    d.tasks.forEach((t) => { if (!(t.needed >= 1)) t.needed = Math.max(1, t.assignees.length); });
+    d.roster = d.roster || [];
     d.github = Object.assign({ orgName: '', orgUrl: '', uploadUrl: '', folderRoot: 'Mechanical', rule: '', repos: [], steps: [], readmeTemplate: '' }, d.github || {});
     return d;
   }
@@ -146,7 +148,7 @@
   // Short chip label: first name, plus last-name initial when two members share a first name ("Ahmed A.").
   function memberShort(m) {
     const parts = (m.name || '').trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return m.id;
+    if (!parts.length) return m.label || m.id;
     const clash = data.members.some((o) => o.id !== m.id && (o.name || '').trim().split(/\s+/)[0] === parts[0]);
     return clash && parts.length > 1 ? parts[0] + ' ' + parts[parts.length - 1].charAt(0) + '.' : parts[0];
   }
@@ -331,6 +333,13 @@
     return html;
   }
 
+  // "👥 2 needed" badge; admins also see how many seats are still empty.
+  function neededBadge(t) {
+    const missing = t.needed - t.assignees.length;
+    if (isAdmin && missing > 0) return '<span class="badge soon" title="Members needed for this task">👥 ' + missing + ' more needed</span>';
+    return '<span class="badge info" title="Members needed for this task">👥 ' + t.needed + ' needed</span>';
+  }
+
   function chips(ids) {
     if (!ids.length) return '<span class="chip unassigned">Unassigned</span>';
     return ids.map((id, i) => {
@@ -360,7 +369,7 @@
     return '<article class="card hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '" tabindex="0"' + (isAdmin ? ' draggable="true"' : '') + '>' +
       '<div class="card-top"><span class="code">' + esc(t.code) + '</span><span class="grp">' + esc(g.id + ' · ' + (g.short || g.title)) + '</span>' + (t.priority === 'high' ? '<span class="prio">High</span>' : '') + '</div>' +
       '<h3>' + esc(t.title) + '</h3>' +
-      '<div class="card-meta"><span class="tnum">' + esc(fmtShort(t.start)) + ' → <b>' + esc(fmtShort(t.due)) + '</b></span>' + (due && t.status !== 'done' ? '<span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') + (di ? '<span class="badge ' + di.cls + '">' + ghMini + esc(di.text) + '</span>' : '') + '</div>' +
+      '<div class="card-meta"><span class="tnum">' + esc(fmtShort(t.start)) + ' → <b>' + esc(fmtShort(t.due)) + '</b></span>' + neededBadge(t) + (due && t.status !== 'done' ? '<span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') + (di ? '<span class="badge ' + di.cls + '">' + ghMini + esc(di.text) + '</span>' : '') + '</div>' +
       '<div class="card-foot">' + chips(t.assignees) +
       (isAdmin ? '<select data-status-for="' + esc(t.id) + '" aria-label="Status">' + STATUSES.map((s) => '<option value="' + s.id + '"' + (s.id === t.status ? ' selected' : '') + '>' + s.label + '</option>').join('') + '</select>' : '') +
       '</div></article>';
@@ -520,17 +529,28 @@
       list.map((t) => {
         const due = dueInfo(t);
         return '<tr class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><td class="code">' + esc(t.code) + '</td><td>' + esc(t.title) + '<div class="small muted">' + esc(groupById(t.group).short || '') + (t.deliverable ? ' · ' + esc(t.deliverable) : '') + '</div></td>' +
-          '<td><div class="who">' + chips(t.assignees) + '</div></td><td class="date">' + esc(fmtDay(t.start)) + '</td><td class="date deadline">' + esc(fmtDay(t.due)) + '</td>' +
+          '<td><div class="who">' + chips(t.assignees) + '</div><div class="small muted" style="margin-top:3px">👥 ' + t.needed + ' needed</div></td><td class="date">' + esc(fmtDay(t.start)) + '</td><td class="date deadline">' + esc(fmtDay(t.due)) + '</td>' +
           '<td><span class="pill"><span class="dot st-' + esc(t.status) + '"></span>' + STATUS_LABEL[t.status] + '</span>' + (due && t.status !== 'done' ? ' <span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') +
           (docInfo(t) ? ' <span class="badge ' + docInfo(t).cls + '">' + ghMini + esc(docInfo(t).text) + '</span>' : '') + '</td></tr>';
       }).join('') + '</tbody></table></div>';
   }
 
   // ---------------------------------------------------------------- team
+  // Admin: choose which real person is "Member N" (from the roster in data.js), or leave it open.
+  function nameSelect(m) {
+    const takenBy = new Map(data.members.filter((o) => o.id !== m.id && o.name).map((o) => [o.name, o.label]));
+    const names = data.roster.slice();
+    if (m.name && !names.includes(m.name)) names.unshift(m.name);
+    return '<select data-member-field="name" data-member="' + esc(m.id) + '" aria-label="Who is ' + esc(m.label) + '?">' +
+      '<option value="">Who is ' + esc(m.label) + '? (not decided)</option>' +
+      names.map((n) => '<option value="' + esc(n) + '"' + (n === m.name ? ' selected' : '') + '>' + esc(n) + (takenBy.has(n) ? ' (now ' + esc(takenBy.get(n)) + ')' : '') + '</option>').join('') +
+      '</select>';
+  }
+
   function renderTeam() {
     let html = '<div class="gantt-legend"><span>' + (isAdmin
-      ? 'Admin: type real names/roles below to map the placeholders. Remember the published site is public.'
-      : 'Pick yourself in the <b>Member</b> filter (or open your personal link) to highlight your tasks everywhere.') + '</span></div>';
+      ? 'Admin: each numbered member has a set of tasks. When you decide who is who, pick the person for each number below (the published site is public).'
+      : 'Each numbered member below is responsible for the listed tasks. The team leader will announce who is which number.') + '</span></div>';
     html += '<div class="team-grid">' + data.members.map((m) => {
       const mine = sortedTasks().filter((t) => t.assignees.includes(m.id)).sort((a, b) => a.due.localeCompare(b.due));
       const done = mine.filter((t) => t.status === 'done').length;
@@ -540,7 +560,7 @@
       const undocumented = mine.filter((t) => (docInfo(t) || {}).state === 'missing').length;
       return '<article class="member' + (state.member === m.id ? ' me' : '') + '">' +
         '<div class="member-head"><div class="avatar">' + esc(m.id) + '</div><div class="who"><h3>' + esc(memberName(m)) + (m.name ? ' <span class="small muted">' + esc(m.label) + '</span>' : '') + '</h3><div class="role">' + esc(m.role || '—') + '</div></div></div>' +
-        (isAdmin ? '<div class="member-edit"><input data-member-field="name" data-member="' + esc(m.id) + '" placeholder="Real name for ' + esc(m.label) + '" value="' + esc(m.name || '') + '" aria-label="Name for ' + esc(m.label) + '"><input data-member-field="role" data-member="' + esc(m.id) + '" placeholder="Role" value="' + esc(m.role || '') + '" aria-label="Role for ' + esc(m.label) + '"></div>' : '') +
+        (isAdmin ? '<div class="member-edit">' + nameSelect(m) + '<input data-member-field="role" data-member="' + esc(m.id) + '" placeholder="Role" value="' + esc(m.role || '') + '" aria-label="Role for ' + esc(m.label) + '"></div>' : '') +
         '<div class="member-stats"><span><b>' + mine.length + '</b> tasks</span><span><b>' + owned + '</b> as owner</span><span><b>' + done + '</b> done</span>' + (late ? '<span class="badge late">' + late + ' overdue</span>' : '') + (undocumented ? '<span class="badge late">' + ghMini + ' ' + undocumented + ' not on GitHub</span>' : '') + '</div>' +
         (next ? '<div class="small">Next deadline: <b>' + esc(fmtDay(next.due)) + '</b> · ' + esc(next.code + ' ' + next.title) + '</div>' : '<div class="small muted">No open tasks</div>') +
         '<ul>' + mine.map((t) => '<li class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><span class="dot st-' + esc(t.status) + '"></span><span class="code">' + esc(t.code) + '</span><span class="t" title="' + esc(t.title) + '">' + esc(t.title) + '</span><span class="d">' + esc(fmtShort(t.due)) + '</span></li>').join('') + '</ul>' +
@@ -582,7 +602,7 @@
       '<div class="detail-grid"><div><div class="k">Start</div><div class="v">' + esc(fmtDay(t.start)) + '</div></div><div><div class="k">Deadline</div><div class="v">' + esc(fmtDay(t.due)) + '</div></div><div><div class="k">Duration</div><div class="v">' + dur + ' day' + (dur === 1 ? '' : 's') + '</div></div></div>' +
       (t.description ? '<div class="detail-sec"><h4>What to do</h4><p>' + esc(t.description) + '</p></div>' : '') +
       (t.deliverable ? '<div class="detail-sec"><h4>Deliverable</h4><p>' + esc(t.deliverable) + '</p></div>' : '') +
-      '<div class="detail-sec"><h4>Assigned to</h4><div class="people">' + (t.assignees.length ? t.assignees.map((mid, i) => {
+      '<div class="detail-sec"><h4>Assigned to · 👥 ' + t.assignees.length + ' of ' + t.needed + ' needed</h4><div class="people">' + (t.assignees.length ? t.assignees.map((mid, i) => {
         const m = memberById(mid);
         return '<div class="person"><span class="chip' + (state.member === mid ? ' me' : '') + '">' + esc(m.id) + '</span><b>' + esc(memberName(m)) + '</b>' + (i === 0 ? '<span class="badge info">owner</span>' : '') + '<span class="role">' + esc(m.role || '') + '</span></div>';
       }).join('') : '<span class="muted">Unassigned</span>') + '</div></div>' +
@@ -603,38 +623,47 @@
 
   // Admin: assign every task in one grid (rows = tasks, columns = members). First assignee = owner.
   function openAssign() {
+    const tag = (m) => m.name ? memberShort(m) : '#' + (String(m.label || m.id).replace(/\D/g, '') || m.id); // compact column label
     const work = new Map(data.tasks.map((t) => [t.id, t.assignees.slice()]));
+    const need = new Map(data.tasks.map((t) => [t.id, t.needed]));
     const ms = data.members;
     let rows = '';
     data.groups.forEach((g) => {
       const ts = sortedTasks().filter((t) => t.group === g.id);
       if (!ts.length) return;
-      rows += '<tr class="grp-row hue-' + esc(catById(g.category).hue) + '"><th colspan="' + (ms.length + 2) + '">' + esc(g.id + ' · ' + (g.short || g.title)) + '</th></tr>';
+      rows += '<tr class="grp-row hue-' + esc(catById(g.category).hue) + '"><th colspan="' + (ms.length + 3) + '">' + esc(g.id + ' · ' + (g.short || g.title)) + '</th></tr>';
       ts.forEach((t) => {
         rows += '<tr data-task="' + esc(t.id) + '"><td class="t hue-' + esc(hueOfTask(t)) + '"><b class="code">' + esc(t.code) + '</b> ' + esc(t.title) + '<div class="small muted">due ' + esc(fmtShort(t.due)) + '</div></td>' +
           ms.map((m) => '<td><input type="checkbox" data-m="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + ' aria-label="Assign ' + esc(t.code) + ' to ' + esc(memberName(m)) + '"></td>').join('') +
+          '<td class="need"><input type="number" data-needed min="1" max="' + ms.length + '" value="' + esc(t.needed) + '" aria-label="Members needed for ' + esc(t.code) + '"><span data-gap></span></td>' +
           '<td><select data-owner aria-label="Owner of ' + esc(t.code) + '"></select></td></tr>';
       });
     });
     openModal('<h2 id="modalTitle">Assign tasks</h2>' +
       '<p class="muted small" style="margin-top:4px">Tick who works on each task. The <b>owner</b> is responsible for the deadline and the GitHub upload. Nothing changes until you click Save; then Export data.js to publish.</p>' +
       '<div class="assign-wrap"><table class="assign"><thead><tr><th class="t">Task</th>' +
-      ms.map((m) => '<th title="' + esc(memberName(m)) + '">' + esc(memberShort(m)) + '</th>').join('') + '<th>Owner</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody><tfoot><tr><th class="t">Tasks per person</th>' + ms.map((m) => '<td data-load="' + esc(m.id) + '"></td>').join('') + '<td></td></tr></tfoot></table></div>' +
+      ms.map((m) => '<th title="' + esc(memberName(m)) + '">' + esc(tag(m)) + '</th>').join('') + '<th>Needed</th><th>Owner</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody><tfoot><tr><th class="t">Tasks per person</th>' + ms.map((m) => '<td data-load="' + esc(m.id) + '"></td>').join('') + '<td data-need-total></td><td></td></tr></tfoot></table></div>' +
       '<div class="modal-actions"><button class="btn left" type="button" id="assignClear">Clear all</button><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" type="button" id="assignSave">Save assignments</button></div>', true);
 
     const table = $('.assign', modalBody);
     const refreshRow = (tr) => {
       const arr = work.get(tr.dataset.task), sel = $('[data-owner]', tr);
-      sel.innerHTML = arr.length ? arr.map((id) => '<option value="' + esc(id) + '">' + esc(memberShort(memberById(id))) + '</option>').join('') : '<option value="">—</option>';
+      sel.innerHTML = arr.length ? arr.map((id) => '<option value="' + esc(id) + '">' + esc(tag(memberById(id))) + '</option>').join('') : '<option value="">—</option>';
       sel.disabled = !arr.length;
       if (arr.length) sel.value = arr[0];
       $$('input[data-m]', tr).forEach((cb) => { cb.checked = arr.includes(cb.dataset.m); cb.parentElement.classList.toggle('is-owner', cb.dataset.m === arr[0]); });
+      const gap = need.get(tr.dataset.task) - arr.length, gapEl = $('[data-gap]', tr);
+      gapEl.textContent = gap === 0 ? '✓' : gap > 0 ? gap + ' short' : (-gap) + ' extra';
+      gapEl.className = 'gap ' + (gap === 0 ? 'ok' : 'off');
     };
     const refreshLoad = () => ms.forEach((m) => {
       const all = Array.from(work.values());
       const n = all.filter((a) => a.includes(m.id)).length, own = all.filter((a) => a[0] === m.id).length;
       $('[data-load="' + m.id + '"]', table).innerHTML = '<b>' + n + '</b>' + (own ? '<div class="small muted">' + own + ' own</div>' : '');
+      const seats = Array.from(need.values()).reduce((a, b) => a + b, 0);
+      const filled = Array.from(work.entries()).reduce((a, e) => a + Math.min(e[1].length, need.get(e[0])), 0);
+      $('[data-need-total]', table).innerHTML = '<b>' + filled + '/' + seats + '</b><div class="small muted">seats filled</div>';
     });
     $$('tr[data-task]', table).forEach(refreshRow);
     refreshLoad();
@@ -648,6 +677,10 @@
         if (e.target.checked) arr.push(e.target.dataset.m);
       } else if (e.target.matches('[data-owner]') && e.target.value) {
         arr = [e.target.value].concat(arr.filter((id) => id !== e.target.value));
+      } else if (e.target.matches('[data-needed]')) {
+        const v = Math.min(ms.length, Math.max(1, parseInt(e.target.value, 10) || 1));
+        e.target.value = v;
+        need.set(tr.dataset.task, v);
       }
       work.set(tr.dataset.task, arr);
       refreshRow(tr);
@@ -661,8 +694,8 @@
     $('#assignSave').addEventListener('click', () => {
       let changed = 0;
       data.tasks.forEach((t) => {
-        const next = work.get(t.id) || [];
-        if (next.join() !== t.assignees.join()) { t.assignees = next; changed++; }
+        const next = work.get(t.id) || [], n = need.get(t.id) || 1;
+        if (next.join() !== t.assignees.join() || n !== t.needed) { t.assignees = next; t.needed = n; changed++; }
       });
       closeModal();
       if (changed) commit('Assignments saved for ' + changed + ' task' + (changed === 1 ? '' : 's'));
@@ -682,7 +715,7 @@
     const t = existing ? clone(existing) : Object.assign({
       id: '', group: g0, code: nextCode(g0), title: '', description: '', deliverable: '',
       assignees: state.member !== 'all' ? [state.member] : [], start: TODAY < data.project.start ? data.project.start : TODAY,
-      due: addDays(TODAY < data.project.start ? data.project.start : TODAY, 6), status: 'todo', priority: 'normal'
+      due: addDays(TODAY < data.project.start ? data.project.start : TODAY, 6), status: 'todo', priority: 'normal', needed: 1
     }, template || {});
     openModal('<h2 id="modalTitle">' + (existing ? 'Edit task ' + esc(t.code) : 'New task') + '</h2>' +
       '<form class="form" id="taskForm" novalidate>' +
@@ -696,6 +729,7 @@
       '<label>Deadline<input type="date" name="due" value="' + esc(t.due) + '" required></label>' +
       '<label>Status<select name="status">' + STATUSES.map((s) => '<option value="' + s.id + '"' + (s.id === t.status ? ' selected' : '') + '>' + s.label + '</option>').join('') + '</select></label>' +
       '<label>Priority<select name="priority">' + Object.keys(PRIORITY_LABEL).map((k) => '<option value="' + k + '"' + (k === t.priority ? ' selected' : '') + '>' + PRIORITY_LABEL[k] + '</option>').join('') + '</select></label>' +
+      '<label>Members needed<input type="number" name="needed" min="1" max="' + data.members.length + '" value="' + esc(t.needed || 1) + '"></label>' +
       '<div class="full"><div class="small muted" style="font-weight:600;margin-bottom:4px">Assigned to <span style="font-weight:400">(first ticked = owner)</span></div><div class="assignee-picker">' +
       data.members.map((m) => '<label title="' + esc(memberName(m) + (m.role ? ' · ' + m.role : '')) + '"><input type="checkbox" name="assignees" value="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + '>' + esc(memberShort(m)) + '</label>').join('') +
       '</div><div class="small muted" id="ownerHint" style="margin-top:4px"></div></div>' +
@@ -722,7 +756,8 @@
         id: existing ? existing.id : 't' + Date.now().toString(36),
         group: f.group.value, code: f.code.value.trim(), title: f.title.value.trim(),
         description: f.description.value.trim(), deliverable: f.deliverable.value.trim(), docLink: f.docLink.value.trim(),
-        assignees: order.slice(), start: f.start.value, due: f.due.value, status: f.status.value, priority: f.priority.value
+        assignees: order.slice(), start: f.start.value, due: f.due.value, status: f.status.value, priority: f.priority.value,
+        needed: Math.min(data.members.length, Math.max(1, parseInt(f.needed.value, 10) || 1))
       };
       const err = !rec.title ? 'Title is required.' : !rec.code ? 'Code is required.' :
         rec.docLink && !safeUrl(rec.docLink) ? 'GitHub link must start with https://' :
@@ -945,7 +980,13 @@
     else if (t.matches('[data-status-for]')) setStatus(t.dataset.statusFor, t.value);
     else if (t.matches('[data-member-field]') && isAdmin) {
       const m = data.members.find((x) => x.id === t.dataset.member);
-      if (m) { m[t.dataset.memberField] = t.value.trim(); commit('Updated ' + m.label); }
+      if (m) {
+        const v = t.value.trim();
+        // one person per number: picking a name that another number had moves it here
+        if (t.dataset.memberField === 'name' && v) data.members.forEach((o) => { if (o !== m && o.name === v) o.name = ''; });
+        m[t.dataset.memberField] = v;
+        commit(t.dataset.memberField === 'name' ? (v ? m.label + ' = ' + v : m.label + ' not decided') : 'Updated ' + m.label);
+      }
     }
     else if (t.id === 'importFile' && t.files && t.files[0]) { importData(t.files[0]); t.value = ''; }
   });
