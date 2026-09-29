@@ -1,22 +1,9 @@
 /*
  * AGV Mechanical Phase: Task Portal DATA FILE
- * ------------------------------------------------------------------
- * This is the ONLY file you need to change to update what the team sees.
- *
- *  Option A (easiest): open the portal, log in as Team Leader, edit tasks in
- *            the UI, click "Export data.js", then upload the exported file to
- *            GitHub in place of this one.
- *  Option B: edit this file directly on GitHub (pencil icon). The content
- *            after "window.PORTAL_DATA =" must stay valid JSON (double quotes,
- *            no trailing commas).
- *
- *  status   : "todo" | "doing" | "done"
- *  priority : "high" | "normal" | "low"
- *  dates    : "YYYY-MM-DD"
- *  assignees: member ids "M1" ... "M10" (first one = task owner)
- *  To map real names: fill "name" in the members list below (or use the Team
- *  tab in Admin mode). NOTE: the published site is public, so anything written
- *  here can be seen by anyone who has the link.
+ * Exported from Admin mode on 2026-09-30.
+ * Upload this file to the GitHub repository (replace the existing data.js).
+ * status: "todo" | "doing" | "done" · priority: "high" | "normal" | "low" · dates: "YYYY-MM-DD"
+ * NOTE: the published site is public; anything written here can be seen by anyone who has the link.
  */
 window.PORTAL_DATA = {
   "project": {
@@ -254,24 +241,24 @@ window.PORTAL_DATA = {
   ],
   "tasks": [
     {
-      "id": "p1-1",
-      "group": "A",
-      "code": "1",
-      "title": "Chassis CAD",
-      "description": "Full SolidWorks model of the new chassis: aluminum-extrusion frame (standard profiles, brackets, T-nuts), mounting points for the drive wheels/hoverboard motors, caster, lift base plate, battery and electronics bay, and front/rear LiDAR mounts. Size members for the 100 kg payload case.",
-      "deliverable": "Chassis assembly (.SLDASM) + STEP + profile cut list",
       "assignees": [
         "M1",
         "M2",
         "M3",
         "M4"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Full SolidWorks model of the new chassis: aluminum-extrusion frame (standard profiles, brackets, T-nuts), mounting points for the drive wheels/hoverboard motors, caster, lift base plate, battery and electronics bay, and front/rear LiDAR mounts. Size members for the 100 kg payload case.",
+      "deliverable": "Chassis assembly (.SLDASM) + STEP + profile cut list",
+      "docLink": "",
+      "id": "p1-1",
+      "group": "A",
+      "code": "1",
+      "title": "Chassis CAD",
       "needed": 4,
       "start": "2026-09-28",
       "due": "2026-10-14",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-A_design/01_chassis-cad",
       "docs": [
         "SolidWorks parts/assembly + STEP export",
@@ -281,21 +268,21 @@ window.PORTAL_DATA = {
       ]
     },
     {
+      "assignees": [
+        "M5"
+      ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Calculate the required wheel diameter and drive layout: traction and torque for robot + 100 kg payload, target speed, ground clearance, obstacle/threshold height, and alignment of the two drive wheels with the caster (all contact points on one plane, parallel axles). Compare the available hoverboard hub-motor sizes (e.g., 6.5 in, 8 in, 10 in) and recommend one. The result feeds the chassis CAD.",
+      "deliverable": "Calculation sheet + recommended wheel/motor size",
+      "docLink": "",
       "id": "p1-2",
       "group": "A",
       "code": "2",
       "title": "Wheel alignment calculations to choose the diameter of the wheels used",
-      "description": "Calculate the required wheel diameter and drive layout: traction and torque for robot + 100 kg payload, target speed, ground clearance, obstacle/threshold height, and alignment of the two drive wheels with the caster (all contact points on one plane, parallel axles). Compare the available hoverboard hub-motor sizes (e.g., 6.5 in, 8 in, 10 in) and recommend one. The result feeds the chassis CAD.",
-      "deliverable": "Calculation sheet + recommended wheel/motor size",
-      "assignees": [
-        "M5"
-      ],
       "needed": 1,
       "start": "2026-09-28",
       "due": "2026-10-05",
-      "status": "done",
-      "priority": "high",
-      "docLink": "https://github.com/Graduation-Project-2027/AGV-Mechanical-Phase/commit/cd63935bce9a4f6c6ee5836cf42ed90abe197e0e",
       "folder": "Phase-A_design/02_wheel-diameter-calcs",
       "docs": [
         "Calculation sheet (Excel/PDF) with all assumptions",
@@ -304,23 +291,23 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-3",
-      "group": "A",
-      "code": "3",
-      "title": "Lifting mechanism CAD edits (Design for Manufacturing)",
-      "description": "Rework the four-scissor lift CAD so local workshops can make it: standard plate/bar thicknesses, laser-cuttable arm profiles, reamed pivot holes with defined tolerances, standard pins/bearings/bushings, bolted instead of welded joints where possible, and fewer unique parts. Keep the proven geometry (arm length, pivot spacing).",
-      "deliverable": "DFM-updated lift assembly + list of changes",
       "assignees": [
         "M7",
         "M6",
         "M8"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Rework the four-scissor lift CAD so local workshops can make it: standard plate/bar thicknesses, laser-cuttable arm profiles, reamed pivot holes with defined tolerances, standard pins/bearings/bushings, bolted instead of welded joints where possible, and fewer unique parts. Keep the proven geometry (arm length, pivot spacing).",
+      "deliverable": "DFM-updated lift assembly + list of changes",
+      "docLink": "",
+      "id": "p1-3",
+      "group": "A",
+      "code": "3",
+      "title": "Lifting mechanism CAD edits (Design for Manufacturing)",
       "needed": 3,
       "start": "2026-09-28",
       "due": "2026-10-12",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-A_design/03_lift-cad-dfm",
       "docs": [
         "Updated SolidWorks files + STEP",
@@ -329,22 +316,22 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-4",
-      "group": "A",
-      "code": "4",
-      "title": "Sheet metal cover CAD",
-      "description": "Design the aluminum sheet-metal cover for all four sides using SolidWorks Sheet Metal: fixing to the extrusion slots, removable access panel(s) for battery/electronics, LiDAR windows, cable pass-throughs and ventilation. Export flat patterns (DXF) with bend lines.",
-      "deliverable": "Sheet-metal parts + flat-pattern DXFs",
       "assignees": [
         "M9",
         "M10"
       ],
+      "status": "todo",
+      "priority": "normal",
+      "description": "Design the aluminum sheet-metal cover for all four sides using SolidWorks Sheet Metal: fixing to the extrusion slots, removable access panel(s) for battery/electronics, LiDAR windows, cable pass-throughs and ventilation. Export flat patterns (DXF) with bend lines.",
+      "deliverable": "Sheet-metal parts + flat-pattern DXFs",
+      "docLink": "",
+      "id": "p1-4",
+      "group": "A",
+      "code": "4",
+      "title": "Sheet metal cover CAD",
       "needed": 2,
       "start": "2026-09-28",
       "due": "2026-10-14",
-      "status": "todo",
-      "priority": "normal",
-      "docLink": "",
       "folder": "Phase-A_design/04_sheet-metal-cover",
       "docs": [
         "Sheet-metal parts + DXF flat patterns",
@@ -353,22 +340,22 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-5",
-      "group": "B",
-      "code": "5",
-      "title": "Chassis with mechanism assembly",
-      "description": "Mate the chassis, cover, drive wheels and the DFM lift into one top-level assembly. Run interference detection through the full lift stroke, check clearances to wiring and cover, and compute the combined mass properties (mass, CG) for the analyses and the URDF.",
-      "deliverable": "Top-level assembly + interference report + mass properties",
       "assignees": [
         "M1",
         "M9"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Mate the chassis, cover, drive wheels and the DFM lift into one top-level assembly. Run interference detection through the full lift stroke, check clearances to wiring and cover, and compute the combined mass properties (mass, CG) for the analyses and the URDF.",
+      "deliverable": "Top-level assembly + interference report + mass properties",
+      "docLink": "",
+      "id": "p1-5",
+      "group": "B",
+      "code": "5",
+      "title": "Chassis with mechanism assembly",
       "needed": 2,
       "start": "2026-10-15",
       "due": "2026-10-19",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-B_integration-and-analysis/05_chassis-mechanism-assembly",
       "docs": [
         "Top-level assembly + STEP",
@@ -378,23 +365,23 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-6",
-      "group": "B",
-      "code": "6",
-      "title": "Chassis stress analysis",
-      "description": "Static FEA of the chassis under the 100 kg payload (with dynamic factor) applied through the lift mounts, supported at the drive wheels and caster. Report von Mises stress, safety factor (target ≥ 1.5) and max deflection; propose reinforcement where needed.",
-      "deliverable": "FEA report (stress, SF, deflection) + design changes",
       "assignees": [
         "M2",
         "M3",
         "M4"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Static FEA of the chassis under the 100 kg payload (with dynamic factor) applied through the lift mounts, supported at the drive wheels and caster. Report von Mises stress, safety factor (target ≥ 1.5) and max deflection; propose reinforcement where needed.",
+      "deliverable": "FEA report (stress, SF, deflection) + design changes",
+      "docLink": "",
+      "id": "p1-6",
+      "group": "B",
+      "code": "6",
+      "title": "Chassis stress analysis",
       "needed": 3,
       "start": "2026-10-15",
       "due": "2026-10-25",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-B_integration-and-analysis/06_chassis-stress-analysis",
       "docs": [
         "FEA study files",
@@ -403,23 +390,23 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-7",
-      "group": "B",
-      "code": "7",
-      "title": "Mechanisms' modal analysis",
-      "description": "Frequency (modal) analysis of the lift mechanism, raised and lowered, to find its natural frequencies and mode shapes. Check they stay well away from excitation sources (motor/drive speeds, floor vibration while driving) and stiffen the design if a mode is too low.",
-      "deliverable": "Modal analysis report (first modes + recommendations)",
       "assignees": [
         "M6",
         "M7",
         "M8"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Frequency (modal) analysis of the lift mechanism, raised and lowered, to find its natural frequencies and mode shapes. Check they stay well away from excitation sources (motor/drive speeds, floor vibration while driving) and stiffen the design if a mode is too low.",
+      "deliverable": "Modal analysis report (first modes + recommendations)",
+      "docLink": "",
+      "id": "p1-7",
+      "group": "B",
+      "code": "7",
+      "title": "Mechanisms' modal analysis",
       "needed": 3,
       "start": "2026-10-15",
       "due": "2026-10-25",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-B_integration-and-analysis/07_mechanism-modal-analysis",
       "docs": [
         "Frequency study files",
@@ -428,22 +415,22 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-8",
-      "group": "B",
-      "code": "8",
-      "title": "Purchase list (Al extrusion, Bearing, Wheels, Hoverboard motors)",
-      "description": "Build the final purchase list from the CAD: aluminum extrusion (profile, total length, cuts), brackets/T-nuts/fasteners, bearings, wheels and caster, hoverboard motors, sheets and lift stock. For each item: spec, quantity, 2–3 suppliers with price (EGP) and lead time. Get budget approval so ordering starts on day 1 of Phase C.",
-      "deliverable": "Approved purchase list with suppliers, prices and lead times",
       "assignees": [
         "M5",
         "M10"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Build the final purchase list from the CAD: aluminum extrusion (profile, total length, cuts), brackets/T-nuts/fasteners, bearings, wheels and caster, hoverboard motors, sheets and lift stock. For each item: spec, quantity, 2–3 suppliers with price (EGP) and lead time. Get budget approval so ordering starts on day 1 of Phase C.",
+      "deliverable": "Approved purchase list with suppliers, prices and lead times",
+      "docLink": "",
+      "id": "p1-8",
+      "group": "B",
+      "code": "8",
+      "title": "Purchase list (Al extrusion, Bearing, Wheels, Hoverboard motors)",
       "needed": 2,
       "start": "2026-10-15",
       "due": "2026-10-22",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-B_integration-and-analysis/08_purchase-list",
       "docs": [
         "Purchase list (Excel/PDF)",
@@ -452,12 +439,6 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-9",
-      "group": "C",
-      "code": "9",
-      "title": "Chassis and mechanisms' manufacturing",
-      "description": "Order everything on the purchase list, then manufacture and assemble: cut and drill extrusions, laser-cut and bend sheets, machine lift parts, assemble the frame, drive wheels and caster, lift and cover. Check first-off parts against drawings and finish with a basic mechanical test (rolling, lift stroke, 100 kg static load).",
-      "deliverable": "Assembled chassis + lift + test sheet and photos",
       "assignees": [
         "M3",
         "M1",
@@ -468,12 +449,18 @@ window.PORTAL_DATA = {
         "M7",
         "M10"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Order everything on the purchase list, then manufacture and assemble: cut and drill extrusions, laser-cut and bend sheets, machine lift parts, assemble the frame, drive wheels and caster, lift and cover. Check first-off parts against drawings and finish with a basic mechanical test (rolling, lift stroke, 100 kg static load).",
+      "deliverable": "Assembled chassis + lift + test sheet and photos",
+      "docLink": "",
+      "id": "p1-9",
+      "group": "C",
+      "code": "9",
+      "title": "Chassis and mechanisms' manufacturing",
       "needed": 8,
       "start": "2026-10-26",
       "due": "2026-11-08",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-C_manufacturing-and-urdf/09_manufacturing",
       "docs": [
         "Receipts/invoices",
@@ -483,22 +470,22 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-10",
-      "group": "C",
-      "code": "10",
-      "title": "CAD's URDF",
-      "description": "Export the final assembly to URDF (SolidWorks to URDF exporter): correct link frames, joint axes and limits (drive wheels, caster, lift), masses and inertias from CAD, and simplified collision meshes. Check it loads in RViz/Gazebo and hand it to the software team (it replaces the old mecanum model).",
-      "deliverable": "URDF package (urdf + meshes) that loads in RViz/Gazebo",
       "assignees": [
         "M8",
         "M9"
       ],
+      "status": "todo",
+      "priority": "normal",
+      "description": "Export the final assembly to URDF (SolidWorks to URDF exporter): correct link frames, joint axes and limits (drive wheels, caster, lift), masses and inertias from CAD, and simplified collision meshes. Check it loads in RViz/Gazebo and hand it to the software team (it replaces the old mecanum model).",
+      "deliverable": "URDF package (urdf + meshes) that loads in RViz/Gazebo",
+      "docLink": "",
+      "id": "p1-10",
+      "group": "C",
+      "code": "10",
+      "title": "CAD's URDF",
       "needed": 2,
       "start": "2026-10-26",
       "due": "2026-11-04",
-      "status": "todo",
-      "priority": "normal",
-      "docLink": "",
       "folder": "Phase-C_manufacturing-and-urdf/10_cad-urdf",
       "docs": [
         "URDF + meshes + config",
@@ -507,12 +494,6 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-11",
-      "group": "D",
-      "code": "11",
-      "title": "Electric components testing, connecting, and fixing to the chassis",
-      "description": "Bench-test each electrical component (hoverboard motors + drivers, battery/BMS, controllers, sensors), then mount them on the chassis at the planned points, route and fix the wiring (separate power and logic), and check everything powers up safely.",
-      "deliverable": "Components mounted and wired + test checklist",
       "assignees": [
         "M10",
         "M1",
@@ -521,12 +502,18 @@ window.PORTAL_DATA = {
         "M5",
         "M6"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Bench-test each electrical component (hoverboard motors + drivers, battery/BMS, controllers, sensors), then mount them on the chassis at the planned points, route and fix the wiring (separate power and logic), and check everything powers up safely.",
+      "deliverable": "Components mounted and wired + test checklist",
+      "docLink": "",
+      "id": "p1-11",
+      "group": "D",
+      "code": "11",
+      "title": "Electric components testing, connecting, and fixing to the chassis",
       "needed": 6,
       "start": "2026-11-09",
       "due": "2026-11-15",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-D_electrical-and-simulation-prep/11_electrical-integration",
       "docs": [
         "Test checklist per component",
@@ -535,24 +522,24 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "id": "p1-12",
-      "group": "D",
-      "code": "12",
-      "title": "New car simulation calculations and implementation",
-      "description": "Update the simulation for the new car: differential-drive kinematics instead of mecanum, new wheel diameter, mass and inertia from the URDF, and the lift model. Recalculate speed/acceleration limits and implement the changes in the Gazebo/ROS setup so the software team can continue.",
-      "deliverable": "Updated simulation running the new car + calculation notes",
       "assignees": [
         "M4",
         "M7",
         "M8",
         "M9"
       ],
+      "status": "todo",
+      "priority": "high",
+      "description": "Update the simulation for the new car: differential-drive kinematics instead of mecanum, new wheel diameter, mass and inertia from the URDF, and the lift model. Recalculate speed/acceleration limits and implement the changes in the Gazebo/ROS setup so the software team can continue.",
+      "deliverable": "Updated simulation running the new car + calculation notes",
+      "docLink": "",
+      "id": "p1-12",
+      "group": "D",
+      "code": "12",
+      "title": "New car simulation calculations and implementation",
       "needed": 4,
       "start": "2026-11-09",
       "due": "2026-11-15",
-      "status": "todo",
-      "priority": "high",
-      "docLink": "",
       "folder": "Phase-D_electrical-and-simulation-prep/12_new-car-simulation",
       "docs": [
         "Calculation notes",
