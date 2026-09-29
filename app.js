@@ -130,9 +130,24 @@
       if (draft && Array.isArray(draft.tasks)) {
         // If the published file already equals the draft, the draft has been published: drop it.
         if (JSON.stringify(normalize(clone(draft))) === JSON.stringify(data)) store.del(KEY.draft);
-        else data = normalize(draft);
+        else data = mergePublished(normalize(draft), data);
       }
     }
+  }
+  // The GitHub automation can mark tasks Done in the published file while the leader has an unpublished
+  // draft. Carry those Done states and GitHub links into the draft so exporting never undoes them.
+  let mergedCount = 0;
+  function mergePublished(draft, pub) {
+    mergedCount = 0;
+    const byId = new Map(pub.tasks.map((t) => [t.id, t]));
+    draft.tasks.forEach((t) => {
+      const p = byId.get(t.id);
+      if (!p) return;
+      if (p.status === 'done' && t.status !== 'done') { t.status = 'done'; mergedCount++; }
+      if (safeUrl(p.docLink) && !safeUrl(t.docLink)) { t.docLink = p.docLink; mergedCount++; }
+    });
+    if (mergedCount) store.set(KEY.draft, JSON.stringify(draft));
+    return draft;
   }
   const hasDraft = () => !!store.get(KEY.draft);
   function commit(message) {
@@ -154,8 +169,34 @@
   }
   const groupById = (id) => data.groups.find((g) => g.id === id) || { id: id, title: id, short: id, category: '' };
   const catById = (id) => data.categories.find((c) => c.id === id) || { id: id, name: id, hue: 'blue' };
-  const hueOfTask = (t) => catById(groupById(t.group).category).hue || 'blue';
+  const hueOfGroup = (g) => g.hue || catById(g.category).hue || 'blue';
+  const hueOfTask = (t) => hueOfGroup(groupById(t.group));
 
+  // ---------------------------------------------------------------- phase gates (waterfall)
+  // A "gated" group (phase) is locked until every task of the previous group in the same part is Done.
+  function prevGroup(g) {
+    const same = data.groups.filter((x) => x.category === g.category);
+    const i = same.findIndex((x) => x.id === g.id);
+    return i > 0 ? same[i - 1] : null;
+  }
+  const groupTasks = (g) => data.tasks.filter((t) => t.group === g.id);
+  const groupDone = (g) => { const ts = groupTasks(g); return ts.length > 0 && ts.every((t) => t.status === 'done'); };
+  function lockedBy(g) {
+    if (!g.gated) return null;
+    const p = prevGroup(g);
+    if (!p) return null;
+    return (groupDone(p) && !lockedBy(p)) ? null : p;
+  }
+  function phaseState(g) {
+    if (groupDone(g)) return { id: 'done', text: '✓ Complete' };
+    const by = lockedBy(g);
+    if (by) return { id: 'locked', text: '🔒 Locked until ' + (by.short || by.id).split('·')[0].trim() + ' is 100% done', by: by };
+    return { id: 'active', text: '▶ Active' };
+  }
+  const taskLock = (t) => lockedBy(groupById(t.group));
+
+  // Numeric codes are shown as "T1"; dotted codes ("1.2") stay as they are.
+  const codeLabel = (t) => /^\d+$/.test(String(t.code)) ? 'T' + t.code : String(t.code);
   function codeKey(code) { return String(code).split('.').map((n) => String(parseInt(n, 10) || 0).padStart(4, '0')).join('.'); }
   function sortedTasks() {
     const gOrder = new Map(data.groups.map((g, i) => [g.id, i]));
@@ -178,6 +219,11 @@
 
   function dueInfo(t) {
     if (t.status === 'done') return { cls: 'ok', text: 'Done', late: false };
+    const lock = taskLock(t);
+    if (lock) {
+      const late = diffDays(TODAY, t.start) < 0;
+      return { cls: late ? 'late' : 'info', text: '🔒 ' + (late ? 'Blocked: ' : 'After ') + (lock.short || lock.id).split('·')[0].trim(), late: false };
+    }
     const d = diffDays(TODAY, t.due);
     if (d < 0) return { cls: 'late', text: 'Overdue ' + (-d) + 'd', late: true };
     if (d === 0) return { cls: 'soon', text: 'Due today', late: false };
@@ -234,10 +280,24 @@
     }
     $('#stats').innerHTML =
       '<div class="stat"><div class="k">Progress · ' + esc(who) + '</div><div class="v">' + pct + '% <small>' + done + '/' + scope.length + ' done</small></div><div class="progress"><i style="width:' + pct + '%"></i></div></div>' +
-      '<div class="stat"><div class="k">In progress / due in 7 days</div><div class="v">' + doing + ' <small>/ ' + dueWeek + '</small></div><div class="sub">' + (state.member === 'all' ? 'across all members' : 'assigned to ' + esc(who)) + '</div></div>' +
+      currentPhaseStat(doing, dueWeek) +
       '<div class="stat' + (late ? ' alert' : '') + '"><div class="k">Overdue</div><div class="v">' + late + '</div><div class="sub">' + (late ? 'needs attention' : 'nothing overdue') + '</div></div>' +
       '<div class="stat">' + msHtml + '</div>' +
       '<div class="stat" style="grid-column:1/-1;padding:8px 14px"><div class="k">Timeline · day ' + elapsed + ' of ' + totalDays + ' (' + esc(fmtShort(p.start)) + ' → ' + esc(fmtShort(p.end)) + ')</div><div class="progress"><i style="width:' + Math.round((elapsed / totalDays) * 100) + '%;background:var(--accent)"></i></div></div>';
+  }
+
+  // The first gated phase that is not complete; falls back to the old "in progress" card when there are no phases.
+  function currentPhaseStat(doing, dueWeek) {
+    const cur = data.groups.find((g) => groupTasks(g).length && !groupDone(g));
+    if (!cur || !data.groups.some((g) => g.gated)) {
+      return '<div class="stat"><div class="k">In progress / due in 7 days</div><div class="v">' + doing + ' <small>/ ' + dueWeek + '</small></div><div class="sub">&nbsp;</div></div>';
+    }
+    const ts = groupTasks(cur), done = ts.filter((t) => t.status === 'done').length;
+    const next = data.groups[data.groups.indexOf(cur) + 1];
+    const pct = Math.round(done / ts.length * 100);
+    return '<div class="stat"><div class="k">Current phase</div><div class="v">' + esc((cur.short || cur.id).split('·')[0].trim()) + ' <small>' + done + '/' + ts.length + ' tasks done</small></div>' +
+      '<div class="progress"><i style="width:' + pct + '%;background:var(--hue-' + esc(hueOfGroup(cur)) + ')"></i></div>' +
+      '<div class="sub">' + (next && next.gated ? esc((next.short || next.id).split('·')[0].trim()) + ' unlocks at 100%' : 'final phase') + '</div></div>';
   }
 
   function renderAdminBar() {
@@ -320,7 +380,7 @@
       html += '<div class="table-wrap"><table class="sched"><thead><tr><th>Code</th><th>Task</th><th>Assigned</th><th>Status</th><th>GitHub</th></tr></thead><tbody>' +
         started.map((t) => {
           const di = docInfo(t);
-          return '<tr class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><td class="code">' + esc(t.code) + '</td><td>' + esc(t.title) + '<div class="small muted mono">' + esc(taskFolder(t)) + '</div></td>' +
+          return '<tr class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><td class="code">' + esc(codeLabel(t)) + '</td><td>' + esc(t.title) + '<div class="small muted mono">' + esc(taskFolder(t)) + '</div></td>' +
             '<td><div class="who">' + chips(t.assignees) + '</div></td><td><span class="pill"><span class="dot st-' + esc(t.status) + '"></span>' + STATUS_LABEL[t.status] + '</span></td>' +
             '<td>' + (safeUrl(t.docLink) ? '<a class="badge ok" href="' + esc(t.docLink) + '" target="_blank" rel="noopener">Open ↗</a>' : '<span class="badge ' + di.cls + '">' + esc(di.text) + '</span>') + '</td></tr>';
         }).join('') + '</tbody></table></div>';
@@ -328,16 +388,26 @@
     html += '</section>';
 
     html += '<section class="phase-card"><div class="phase-head hue-amber"><span class="wk">Checklists</span><h2>What to upload for each task type</h2></div><div class="checklists">' +
-      data.groups.map((g) => '<div class="checklist hue-' + esc(catById(g.category).hue) + '"><h4><span class="code">' + esc(g.id) + '</span> ' + esc(g.short || g.title) + '</h4><ul>' + (g.docs || []).map((d) => '<li>' + esc(d) + '</li>').join('') + '</ul></div>').join('') +
+      (data.tasks.some((t) => t.docs && t.docs.length)
+        // per-task checklists (current board)
+        ? sortedTasks().filter((t) => t.docs && t.docs.length).map((t) => '<div class="checklist hue-' + esc(hueOfTask(t)) + '"><h4><span class="code">' + esc(codeLabel(t)) + '</span> ' + esc(t.title) + '</h4><ul>' + t.docs.map((d) => '<li>' + esc(d) + '</li>').join('') + '</ul></div>').join('')
+        : data.groups.map((g) => '<div class="checklist hue-' + esc(hueOfGroup(g)) + '"><h4><span class="code">' + esc(g.id) + '</span> ' + esc(g.short || g.title) + '</h4><ul>' + (g.docs || []).map((d) => '<li>' + esc(d) + '</li>').join('') + '</ul></div>').join('')) +
       '</div></section>';
     return html;
   }
 
-  // "👥 2 needed" badge; admins also see how many seats are still empty.
+  // "17 days (2.4 weeks)" or, short, "17d"
+  function durationText(t, short) {
+    const n = diffDays(t.start, t.due) + 1;
+    if (short) return n + 'd';
+    return n + ' day' + (n === 1 ? '' : 's') + (n >= 7 ? ' (' + (Math.round(n / 7 * 10) / 10) + ' weeks)' : '');
+  }
+
+  // "👥 2 members" badge; admins also see how many seats are still empty.
   function neededBadge(t) {
     const missing = t.needed - t.assignees.length;
     if (isAdmin && missing > 0) return '<span class="badge soon" title="Members needed for this task">👥 ' + missing + ' more needed</span>';
-    return '<span class="badge info" title="Members needed for this task">👥 ' + t.needed + ' needed</span>';
+    return '<span class="badge info" title="Members needed for this task">👥 ' + t.needed + ' member' + (t.needed === 1 ? '' : 's') + '</span>';
   }
 
   function chips(ids) {
@@ -367,9 +437,9 @@
     const due = dueInfo(t);
     const di = docInfo(t);
     return '<article class="card hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '" tabindex="0"' + (isAdmin ? ' draggable="true"' : '') + '>' +
-      '<div class="card-top"><span class="code">' + esc(t.code) + '</span><span class="grp">' + esc(g.id + ' · ' + (g.short || g.title)) + '</span>' + (t.priority === 'high' ? '<span class="prio">High</span>' : '') + '</div>' +
+      '<div class="card-top"><span class="code">' + esc(codeLabel(t)) + '</span><span class="grp">' + esc(g.short || g.title) + '</span>' + (t.priority === 'high' ? '<span class="prio">High</span>' : '') + '</div>' +
       '<h3>' + esc(t.title) + '</h3>' +
-      '<div class="card-meta"><span class="tnum">' + esc(fmtShort(t.start)) + ' → <b>' + esc(fmtShort(t.due)) + '</b></span>' + neededBadge(t) + (due && t.status !== 'done' ? '<span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') + (di ? '<span class="badge ' + di.cls + '">' + ghMini + esc(di.text) + '</span>' : '') + '</div>' +
+      '<div class="card-meta"><span class="tnum">' + esc(fmtShort(t.start)) + ' → <b>' + esc(fmtShort(t.due)) + '</b> · ⏱ ' + durationText(t, true) + '</span>' + neededBadge(t) + (due && t.status !== 'done' ? '<span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') + (di ? '<span class="badge ' + di.cls + '">' + ghMini + esc(di.text) + '</span>' : '') + '</div>' +
       '<div class="card-foot">' + chips(t.assignees) +
       (isAdmin ? '<select data-status-for="' + esc(t.id) + '" aria-label="Status">' + STATUSES.map((s) => '<option value="' + s.id + '"' + (s.id === t.status ? ' selected' : '') + '>' + s.label + '</option>').join('') + '</select>' : '') +
       '</div></article>';
@@ -393,6 +463,12 @@
   function setStatus(id, status) {
     const t = data.tasks.find((x) => x.id === id);
     if (!t || t.status === status) return;
+    const lock = taskLock(t);
+    if (lock && status !== 'todo') {
+      toast('🔒 ' + groupById(t.group).short.split('·')[0].trim() + ' cannot start until ' + (lock.short || lock.id).split('·')[0].trim() + ' is 100% complete');
+      render();
+      return;
+    }
     t.status = status;
     commit(t.code + ' → ' + STATUS_LABEL[status]);
   }
@@ -437,7 +513,8 @@
       const groups = data.groups.filter((g) => g.category === c.id);
       const catHasRows = groups.some((g) => data.tasks.some((t) => t.group === g.id && visibleIds.has(t.id)));
       if (filtering && !catHasRows) return;
-      body += '<div class="g-row g-cat hue-' + esc(c.hue) + '"><div class="g-label">' + esc(c.id + ' · ' + c.name) + '</div><div class="g-track"></div></div>';
+      body += '<div class="g-row g-cat hue-' + esc(c.hue) + (groups.length ? '' : ' g-future') + '"><div class="g-label" title="' + esc(c.name) + '">' + esc(c.name) + '</div><div class="g-track">' +
+        (groups.length ? '' : '<span class="g-future-note">Will be added to the timeline later</span>') + '</div></div>';
       groups.forEach((g) => {
         const all = sortedTasks().filter((t) => t.group === g.id);
         const shown = all.filter((t) => visibleIds.has(t.id));
@@ -450,8 +527,9 @@
           const e = all.reduce((m, t) => (t.due > m ? t.due : m), all[0].due);
           sum = '<div class="g-sum" style="left:' + x(s) + 'px;width:' + span(s, e) + 'px" title="' + esc(g.id + ': ' + fmtShort(s) + ' – ' + fmtShort(e) + ' · ' + pct + '% done') + '"><i style="width:' + pct + '%"></i></div>';
         }
-        body += '<div class="g-row g-group hue-' + esc(c.hue) + (collapsed ? ' collapsed' : '') + '" data-toggle="' + esc(g.id) + '" role="button" tabindex="0" aria-expanded="' + !collapsed + '">' +
-          '<div class="g-label"><span class="caret">▾</span><span class="code">' + esc(g.id) + '</span><span class="t" title="' + esc(g.title) + '">' + esc(g.short || g.title) + '</span><span class="pct">' + pct + '%</span></div>' +
+        const ps = phaseState(g);
+        body += '<div class="g-row g-group hue-' + esc(hueOfGroup(g)) + (collapsed ? ' collapsed' : '') + '" data-toggle="' + esc(g.id) + '" role="button" tabindex="0" aria-expanded="' + !collapsed + '">' +
+          '<div class="g-label"><span class="caret">▾</span><span class="t" title="' + esc(g.title + ' · ' + ps.text) + '">' + esc(g.short || g.title) + '</span><span class="pct" title="' + esc(ps.text) + '">' + (ps.id === 'locked' ? '🔒 ' : ps.id === 'done' ? '✓ ' : '') + pct + '%</span></div>' +
           '<div class="g-track">' + sum + '</div></div>';
         if (collapsed) return;
         (filtering ? shown : all).forEach((t) => {
@@ -459,10 +537,11 @@
           const late = !!(due && due.late);
           const mine = state.member !== 'all' && t.assignees.includes(state.member);
           const who = t.assignees.map((id) => memberShort(memberById(id))).join(', ') || 'Unassigned';
-          body += '<div class="g-row g-task hue-' + esc(c.hue) + '" data-open="' + esc(t.id) + '" tabindex="0">' +
-            '<div class="g-label"><span class="code">' + esc(t.code) + '</span><span class="t" title="' + esc(t.title) + '">' + esc(t.title) + '</span></div>' +
-            '<div class="g-track"><div class="g-bar st-' + esc(t.status) + (late ? ' late' : '') + (mine ? ' me' : '') + '" style="left:' + x(t.start) + 'px;width:' + span(t.start, t.due) + 'px" title="' +
-            esc(t.code + ' ' + t.title + '\n' + fmtShort(t.start) + ' → ' + fmtShort(t.due) + ' · ' + STATUS_LABEL[t.status] + '\n' + who) + '">' + esc(who) + '</div></div></div>';
+          const locked = ps.id === 'locked';
+          body += '<div class="g-row g-task hue-' + esc(hueOfGroup(g)) + '" data-open="' + esc(t.id) + '" tabindex="0">' +
+            '<div class="g-label"><span class="code">' + esc(codeLabel(t)) + '</span><span class="t" title="' + esc(t.title) + '">' + esc(t.title) + '</span></div>' +
+            '<div class="g-track"><div class="g-bar st-' + esc(t.status) + (late ? ' late' : '') + (mine ? ' me' : '') + (locked ? ' locked' : '') + '" style="left:' + x(t.start) + 'px;width:' + span(t.start, t.due) + 'px" title="' +
+            esc(codeLabel(t) + ' ' + t.title + '\n' + fmtShort(t.start) + ' → ' + fmtShort(t.due) + ' (' + durationText(t) + ') · ' + STATUS_LABEL[t.status] + (locked ? ' · ' + ps.text : '') + '\n' + t.needed + ' member(s): ' + who) + '">' + esc(who) + '</div></div></div>';
         });
       });
     });
@@ -514,7 +593,12 @@
     phases.forEach((ph) => {
       const list = tasks.filter((t) => inPhase(t, ph)).sort((a, b) => a.due.localeCompare(b.due) || codeKey(a.code).localeCompare(codeKey(b.code)));
       const ms = data.milestones.filter((m) => m.date >= ph.start && m.date <= ph.end);
-      html += '<section class="phase-card"><div class="phase-head hue-' + esc(ph.hue || 'blue') + '"><span class="wk">' + esc(ph.weeks) + '</span><h2>' + esc(ph.title) + '</h2><span class="range">' + esc(fmtDay(ph.start)) + ' – ' + esc(fmtDay(ph.end)) + ' · ' + (diffDays(ph.start, ph.end) + 1) + ' days</span></div>' +
+      const pg = ph.group ? data.groups.find((g) => g.id === ph.group) : null;
+      const ps = pg ? phaseState(pg) : null;
+      const gate = pg && pg.gated && prevGroup(pg)
+        ? '<div class="gate-note"><span class="badge ' + (ps.id === 'locked' ? 'late' : ps.id === 'done' ? 'ok' : 'info') + '">' + esc(ps.text) + '</span> Starts only when ' + esc((prevGroup(pg).short || prevGroup(pg).id).split('·')[0].trim()) + ' is 100% complete. Tasks inside this phase run in parallel.</div>'
+        : (ps ? '<div class="gate-note"><span class="badge ' + (ps.id === 'done' ? 'ok' : 'info') + '">' + esc(ps.text) + '</span> First phase. Tasks run in parallel.</div>' : '');
+      html += '<section class="phase-card"><div class="phase-head hue-' + esc(ph.hue || 'blue') + '"><span class="wk">' + esc(ph.weeks) + '</span><h2>' + esc(ph.title) + '</h2><span class="range">' + esc(fmtDay(ph.start)) + ' – ' + esc(fmtDay(ph.end)) + ' · ' + (diffDays(ph.start, ph.end) + 1) + ' days</span></div>' + gate +
         (ph.goals && ph.goals.length ? '<ul class="phase-goals">' + ph.goals.map((g) => '<li>' + esc(g) + '</li>').join('') + '</ul>' : '') +
         ms.map((m) => '<div class="ms-note">' + esc(m.id) + ' · ' + esc(fmtDay(m.date)) + ': ' + esc(m.title) + '</div>').join('') +
         scheduleTable(list) + '</section>';
@@ -528,7 +612,7 @@
     return '<div class="table-wrap"><table class="sched"><thead><tr><th>Code</th><th>Task</th><th>Assigned</th><th>Start</th><th>Deadline</th><th>Status</th></tr></thead><tbody>' +
       list.map((t) => {
         const due = dueInfo(t);
-        return '<tr class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><td class="code">' + esc(t.code) + '</td><td>' + esc(t.title) + '<div class="small muted">' + esc(groupById(t.group).short || '') + (t.deliverable ? ' · ' + esc(t.deliverable) : '') + '</div></td>' +
+        return '<tr class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><td class="code">' + esc(codeLabel(t)) + '</td><td>' + esc(t.title) + '<div class="small muted">' + esc(groupById(t.group).short || '') + (t.deliverable ? ' · ' + esc(t.deliverable) : '') + '</div></td>' +
           '<td><div class="who">' + chips(t.assignees) + '</div><div class="small muted" style="margin-top:3px">👥 ' + t.needed + ' needed</div></td><td class="date">' + esc(fmtDay(t.start)) + '</td><td class="date deadline">' + esc(fmtDay(t.due)) + '</td>' +
           '<td><span class="pill"><span class="dot st-' + esc(t.status) + '"></span>' + STATUS_LABEL[t.status] + '</span>' + (due && t.status !== 'done' ? ' <span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') +
           (docInfo(t) ? ' <span class="badge ' + docInfo(t).cls + '">' + ghMini + esc(docInfo(t).text) + '</span>' : '') + '</td></tr>';
@@ -563,7 +647,7 @@
         (isAdmin ? '<div class="member-edit">' + nameSelect(m) + '<input data-member-field="role" data-member="' + esc(m.id) + '" placeholder="Role" value="' + esc(m.role || '') + '" aria-label="Role for ' + esc(m.label) + '"></div>' : '') +
         '<div class="member-stats"><span><b>' + mine.length + '</b> tasks</span><span><b>' + owned + '</b> as owner</span><span><b>' + done + '</b> done</span>' + (late ? '<span class="badge late">' + late + ' overdue</span>' : '') + (undocumented ? '<span class="badge late">' + ghMini + ' ' + undocumented + ' not on GitHub</span>' : '') + '</div>' +
         (next ? '<div class="small">Next deadline: <b>' + esc(fmtDay(next.due)) + '</b> · ' + esc(next.code + ' ' + next.title) + '</div>' : '<div class="small muted">No open tasks</div>') +
-        '<ul>' + mine.map((t) => '<li class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><span class="dot st-' + esc(t.status) + '"></span><span class="code">' + esc(t.code) + '</span><span class="t" title="' + esc(t.title) + '">' + esc(t.title) + '</span><span class="d">' + esc(fmtShort(t.due)) + '</span></li>').join('') + '</ul>' +
+        '<ul>' + mine.map((t) => '<li class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><span class="dot st-' + esc(t.status) + '"></span><span class="code">' + esc(codeLabel(t)) + '</span><span class="t" title="' + esc(t.title) + '">' + esc(t.title) + '</span><span class="d">' + esc(fmtShort(t.due)) + '</span></li>').join('') + '</ul>' +
         '<div class="member-actions"><button class="btn btn-sm" type="button" data-show-member="' + esc(m.id) + '">Show on board</button><button class="btn btn-sm" type="button" data-copy-link="' + esc(m.id) + '">Copy personal link</button></div>' +
         '</article>';
     }).join('') + '</div>';
@@ -594,25 +678,27 @@
     if (!t) return;
     const g = groupById(t.group), c = catById(g.category);
     const due = dueInfo(t);
-    const dur = diffDays(t.start, t.due) + 1;
-    openModal('<div class="hue-' + esc(c.hue) + '">' +
-      '<div class="detail-top"><span class="code">' + esc(t.code) + '</span><span>' + esc(c.id + ' · ' + c.name) + '</span><span>›</span><span>' + esc(g.id + ' · ' + (g.short || '')) + '</span></div>' +
+    const ps = phaseState(g);
+    const docs = (t.docs && t.docs.length) ? t.docs : (g.docs || []);
+    openModal('<div class="hue-' + esc(hueOfTask(t)) + '">' +
+      '<div class="detail-top"><span class="code">Task ' + esc(t.code) + '</span><span>' + esc(c.name) + '</span><span>›</span><span>' + esc(g.short || g.id) + '</span><span class="badge ' + (ps.id === 'locked' ? 'late' : ps.id === 'done' ? 'ok' : 'info') + '">' + esc(ps.text) + '</span></div>' +
       '<h2 id="modalTitle">' + esc(t.title) + '</h2>' +
       '<div class="detail-top" style="margin-top:10px"><span class="pill"><span class="dot st-' + esc(t.status) + '"></span>' + STATUS_LABEL[t.status] + '</span>' + (due && t.status !== 'done' ? '<span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') + (t.priority === 'high' ? '<span class="prio">High priority</span>' : '<span class="small">' + esc(PRIORITY_LABEL[t.priority] || '') + ' priority</span>') + '</div>' +
-      '<div class="detail-grid"><div><div class="k">Start</div><div class="v">' + esc(fmtDay(t.start)) + '</div></div><div><div class="k">Deadline</div><div class="v">' + esc(fmtDay(t.due)) + '</div></div><div><div class="k">Duration</div><div class="v">' + dur + ' day' + (dur === 1 ? '' : 's') + '</div></div></div>' +
+      '<div class="detail-grid"><div><div class="k">Start</div><div class="v">' + esc(fmtDay(t.start)) + '</div></div><div><div class="k">Deadline</div><div class="v">' + esc(fmtDay(t.due)) + '</div></div><div><div class="k">Estimated duration</div><div class="v">' + esc(durationText(t)) + '</div></div></div>' +
       (t.description ? '<div class="detail-sec"><h4>What to do</h4><p>' + esc(t.description) + '</p></div>' : '') +
       (t.deliverable ? '<div class="detail-sec"><h4>Deliverable</h4><p>' + esc(t.deliverable) + '</p></div>' : '') +
       '<div class="detail-sec"><h4>Assigned to · 👥 ' + t.assignees.length + ' of ' + t.needed + ' needed</h4><div class="people">' + (t.assignees.length ? t.assignees.map((mid, i) => {
         const m = memberById(mid);
         return '<div class="person"><span class="chip' + (state.member === mid ? ' me' : '') + '">' + esc(m.id) + '</span><b>' + esc(memberName(m)) + '</b>' + (i === 0 ? '<span class="badge info">owner</span>' : '') + '<span class="role">' + esc(m.role || '') + '</span></div>';
       }).join('') : '<span class="muted">Unassigned</span>') + '</div></div>' +
-      '<div class="detail-sec"><h4>Parent task</h4><p class="muted">' + esc(g.id + ': ' + g.title) + '</p></div>' +
+      '<div class="detail-sec"><h4>Phase</h4><p class="muted">' + esc(g.title) + (g.gated && prevGroup(g) ? '. Starts only when ' + esc((prevGroup(g).short || prevGroup(g).id).split('·')[0].trim()) + ' is 100% complete.' : '') + '</p></div>' +
       '<div class="detail-sec doc-sec"><h4>' + ghMini + ' Document on GitHub (same day!)</h4>' +
       (safeUrl(t.docLink)
         ? '<p><a class="badge ok" href="' + esc(t.docLink) + '" target="_blank" rel="noopener">Open the uploaded work ↗</a></p>'
         : '<p class="small">' + (t.status === 'done' ? '<span class="badge late">Marked done but not on GitHub yet: upload it now.</span>' : 'Upload your files as soon as you produce them, not at the end.') + '</p>') +
       '<div class="small muted" style="margin-top:6px">Suggested folder</div><div class="linkbox" style="margin-top:4px"><input readonly class="mono" value="' + esc(taskFolder(t)) + '" aria-label="Suggested GitHub folder"><button class="btn btn-sm" type="button" data-act="copy-folder" data-id="' + esc(t.id) + '">Copy</button></div>' +
-      ((g.docs || []).length ? '<div class="small muted" style="margin-top:8px">Upload at least</div><ul class="doc-list">' + g.docs.map((d) => '<li>' + esc(d) + '</li>').join('') + '<li>README.md in the folder (template in <b>GitHub &amp; Docs</b>)</li></ul>' : '') +
+      (docs.length ? '<div class="small muted" style="margin-top:8px">Upload at least</div><ul class="doc-list">' + docs.map((d) => '<li>' + esc(d) + '</li>').join('') + '<li>README.md in the folder (template in <b>GitHub &amp; Docs</b>)</li></ul>' : '') +
+      (/^\d+$/.test(t.code) ? '<div class="small" style="margin-top:8px">When the task is finished, write <code>Closes Task ' + esc(t.code) + '</code> in your commit message. The board moves it to Done automatically.</div>' : '') +
       '<div class="gh-actions" style="margin-top:10px">' +
       (folderUploadUrl(t) ? '<a class="btn btn-primary btn-sm" href="' + esc(folderUploadUrl(t)) + '" target="_blank" rel="noopener">Upload to my task folder ↗</a><a class="btn btn-sm" href="' + esc(folderUrl(t)) + '" target="_blank" rel="noopener">Open folder ↗</a>'
         : (uploadUrl() ? '<a class="btn btn-sm" href="' + esc(uploadUrl()) + '" target="_blank" rel="noopener">Open team GitHub ↗</a>' : '')) +
@@ -633,10 +719,10 @@
       if (!ts.length) return;
       rows += '<tr class="grp-row hue-' + esc(catById(g.category).hue) + '"><th colspan="' + (ms.length + 3) + '">' + esc(g.id + ' · ' + (g.short || g.title)) + '</th></tr>';
       ts.forEach((t) => {
-        rows += '<tr data-task="' + esc(t.id) + '"><td class="t hue-' + esc(hueOfTask(t)) + '"><b class="code">' + esc(t.code) + '</b> ' + esc(t.title) + '<div class="small muted">due ' + esc(fmtShort(t.due)) + '</div></td>' +
-          ms.map((m) => '<td><input type="checkbox" data-m="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + ' aria-label="Assign ' + esc(t.code) + ' to ' + esc(memberName(m)) + '"></td>').join('') +
-          '<td class="need"><input type="number" data-needed min="1" max="' + ms.length + '" value="' + esc(t.needed) + '" aria-label="Members needed for ' + esc(t.code) + '"><span data-gap></span></td>' +
-          '<td><select data-owner aria-label="Owner of ' + esc(t.code) + '"></select></td></tr>';
+        rows += '<tr data-task="' + esc(t.id) + '"><td class="t hue-' + esc(hueOfTask(t)) + '"><b class="code">' + esc(codeLabel(t)) + '</b> ' + esc(t.title) + '<div class="small muted">due ' + esc(fmtShort(t.due)) + '</div></td>' +
+          ms.map((m) => '<td><input type="checkbox" data-m="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + ' aria-label="Assign ' + esc(codeLabel(t)) + ' to ' + esc(memberName(m)) + '"></td>').join('') +
+          '<td class="need"><input type="number" data-needed min="1" max="' + ms.length + '" value="' + esc(t.needed) + '" aria-label="Members needed for ' + esc(codeLabel(t)) + '"><span data-gap></span></td>' +
+          '<td><select data-owner aria-label="Owner of ' + esc(codeLabel(t)) + '"></select></td></tr>';
       });
     });
     openModal('<h2 id="modalTitle">Assign tasks</h2>' +
@@ -704,6 +790,10 @@
   }
 
   function nextCode(groupId) {
+    // Board uses plain task numbers (1, 2, … 12): continue the global sequence so "Closes Task N" stays unique.
+    if (data.tasks.length && data.tasks.every((t) => /^\d+$/.test(String(t.code)))) {
+      return String(Math.max.apply(null, data.tasks.map((t) => parseInt(t.code, 10))) + 1);
+    }
     const nums = data.tasks.filter((t) => t.group === groupId).map((t) => parseInt(String(t.code).split('.')[1], 10) || 0);
     const gnum = String(groupId).replace(/\D/g, '') || '0';
     return gnum + '.' + ((nums.length ? Math.max.apply(null, nums) : 0) + 1);
@@ -717,10 +807,10 @@
       assignees: state.member !== 'all' ? [state.member] : [], start: TODAY < data.project.start ? data.project.start : TODAY,
       due: addDays(TODAY < data.project.start ? data.project.start : TODAY, 6), status: 'todo', priority: 'normal', needed: 1
     }, template || {});
-    openModal('<h2 id="modalTitle">' + (existing ? 'Edit task ' + esc(t.code) : 'New task') + '</h2>' +
+    openModal('<h2 id="modalTitle">' + (existing ? 'Edit task ' + esc(codeLabel(t)) : 'New task') + '</h2>' +
       '<form class="form" id="taskForm" novalidate>' +
       '<label>Parent task<select name="group">' + data.groups.map((g) => '<option value="' + esc(g.id) + '"' + (g.id === t.group ? ' selected' : '') + '>' + esc(g.id + ' · ' + (g.short || g.title)) + '</option>').join('') + '</select></label>' +
-      '<label>Code<input name="code" value="' + esc(t.code) + '" placeholder="e.g. 1.6" required></label>' +
+      '<label>Code<input name="code" value="' + esc(t.code) + '" placeholder="e.g. 13" required></label>' +
       '<label class="full">Title<input name="title" value="' + esc(t.title) + '" placeholder="Short, action-oriented title" required></label>' +
       '<label class="full">Description<textarea name="description" placeholder="What exactly needs to be done?">' + esc(t.description) + '</textarea></label>' +
       '<label class="full">Deliverable<input name="deliverable" value="' + esc(t.deliverable) + '" placeholder="What proves the task is done?"></label>' +
@@ -763,6 +853,7 @@
         rec.docLink && !safeUrl(rec.docLink) ? 'GitHub link must start with https://' :
         !isValidISO(rec.start) || !isValidISO(rec.due) ? 'Start and deadline dates are required.' :
         rec.due < rec.start ? 'Deadline must be on or after the start date.' :
+        (rec.status !== 'todo' && lockedBy(groupById(rec.group))) ? 'This phase is locked: it cannot be In Progress or Done until the previous phase is 100% complete.' :
         data.tasks.some((x) => x.code === rec.code && x.id !== rec.id) ? 'Another task already uses code ' + rec.code + '.' : '';
       if (err) { const el = $('#formError'); el.textContent = err; el.hidden = false; return; }
       if (existing) Object.assign(existing, rec); else data.tasks.push(rec);
@@ -774,7 +865,7 @@
   function deleteTask(id) {
     const t = data.tasks.find((x) => x.id === id);
     if (!t) return;
-    openModal('<h2 id="modalTitle">Delete task ' + esc(t.code) + '?</h2><p style="margin-top:10px">“' + esc(t.title) + '” will be removed from your local draft. Nothing changes for the team until you export and publish data.js.</p>' +
+    openModal('<h2 id="modalTitle">Delete task ' + esc(codeLabel(t)) + '?</h2><p style="margin-top:10px">“' + esc(t.title) + '” will be removed from your local draft. Nothing changes for the team until you export and publish data.js.</p>' +
       '<div class="modal-actions"><button class="btn left" type="button" data-close>Cancel</button><button class="btn btn-primary" style="background:var(--danger);border-color:var(--danger)" type="button" data-act="confirm-delete" data-id="' + esc(id) + '">Delete task</button></div>');
   }
 
@@ -1023,5 +1114,6 @@
   if (fromUrl) setMember(fromUrl.id);
   else if (store.get(KEY.member)) state.member = store.get(KEY.member);
   render();
+  if (mergedCount) toast('Merged ' + mergedCount + ' update' + (mergedCount === 1 ? '' : 's') + ' from GitHub into your draft');
   if (location.hash === '#admin' && !isAdmin) openLogin();
 })();
