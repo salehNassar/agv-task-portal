@@ -293,9 +293,9 @@ window.PORTAL_DATA = {
       "needed": 1,
       "start": "2026-09-28",
       "due": "2026-10-05",
-      "status": "todo",
+      "status": "done",
       "priority": "high",
-      "docLink": "",
+      "docLink": "https://github.com/Graduation-Project-2027/AGV-Mechanical-Phase/commit/cd63935bce9a4f6c6ee5836cf42ed90abe197e0e",
       "folder": "Phase-A_design/02_wheel-diameter-calcs",
       "docs": [
         "Calculation sheet (Excel/PDF) with all assumptions",
