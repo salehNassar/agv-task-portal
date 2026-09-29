@@ -25,7 +25,8 @@
     member: 'agvPortal.member',
     view: 'agvPortal.view',
     theme: 'agvPortal.theme',
-    collapsed: 'agvPortal.collapsed'
+    collapsed: 'agvPortal.collapsed',
+    base: 'agvPortal.base'
   };
 
   // ---------------------------------------------------------------- constants & helpers
@@ -129,29 +130,37 @@
       const draft = safeParse(store.get(KEY.draft), null);
       if (draft && Array.isArray(draft.tasks)) {
         // If the published file already equals the draft, the draft has been published: drop it.
-        if (JSON.stringify(normalize(clone(draft))) === JSON.stringify(data)) store.del(KEY.draft);
+        if (JSON.stringify(normalize(clone(draft))) === JSON.stringify(data)) dropDraft();
         else data = mergePublished(normalize(draft), data);
       }
     }
   }
   // The GitHub automation can mark tasks Done in the published file while the leader has an unpublished
   // draft. Carry those Done states and GitHub links into the draft so exporting never undoes them.
+  // Only changes made to the published board AFTER the draft was started are merged (compared with the
+  // snapshot in KEY.base), so a task the leader deliberately reopened is not closed again.
   let mergedCount = 0;
+  const snapshot = (d) => JSON.stringify(Object.fromEntries(d.tasks.map((t) => [t.id, t.status + '|' + (t.docLink || '')])));
   function mergePublished(draft, pub) {
     mergedCount = 0;
+    const base = safeParse(store.get(KEY.base), null);
     const byId = new Map(pub.tasks.map((t) => [t.id, t]));
     draft.tasks.forEach((t) => {
       const p = byId.get(t.id);
       if (!p) return;
+      if (base && base[t.id] === p.status + '|' + (p.docLink || '')) return; // unchanged since the draft began
       if (p.status === 'done' && t.status !== 'done') { t.status = 'done'; mergedCount++; }
       if (safeUrl(p.docLink) && !safeUrl(t.docLink)) { t.docLink = p.docLink; mergedCount++; }
     });
+    store.set(KEY.base, snapshot(pub)); // newer published changes are now part of the draft's baseline
     if (mergedCount) store.set(KEY.draft, JSON.stringify(draft));
     return draft;
   }
   const hasDraft = () => !!store.get(KEY.draft);
+  function dropDraft() { store.del(KEY.draft); store.del(KEY.base); }
   function commit(message) {
     data.project.lastUpdated = TODAY;
+    if (!hasDraft()) store.set(KEY.base, snapshot(normalize(clone(PUBLISHED))));
     store.set(KEY.draft, JSON.stringify(data));
     render();
     if (message) toast(message);
@@ -1050,7 +1059,7 @@
       else if (act === 'discard') {
         openModal('<h2 id="modalTitle">Discard local changes?</h2><p style="margin-top:10px">Your draft will be replaced by the currently published data.js. This cannot be undone.</p><div class="modal-actions"><button class="btn left" type="button" data-close>Cancel</button><button class="btn btn-primary" type="button" data-act="confirm-discard">Discard draft</button></div>');
       }
-      else if (act === 'confirm-discard') { store.del(KEY.draft); closeModal(); loadData(); render(); toast('Draft discarded'); }
+      else if (act === 'confirm-discard') { dropDraft(); closeModal(); loadData(); render(); toast('Draft discarded'); }
       else if (act === 'print') window.print();
       return;
     }
