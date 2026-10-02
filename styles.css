@@ -444,6 +444,11 @@ table.assign { border-collapse: separate; border-spacing: 0; font-size: 13px; wi
 .assign .gap { display: inline-block; min-width: 44px; margin-left: 6px; font-size: 11px; font-weight: 700; text-align: left; }
 .assign .gap.ok { color: var(--done); }
 .assign .gap.off { color: var(--warn); }
+.assign .gap.muted { color: var(--faint); font-weight: 500; }
+.assign .plan-warn { margin-left: 10px; color: var(--warn); text-transform: none; letter-spacing: 0; font-weight: 600; }
+.assign td.date-cell { white-space: nowrap; }
+.assign td.date-cell input { font-size: 12px; padding: 3px 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); color: var(--text); }
+.assign [data-dur].bad { color: var(--danger); font-weight: 700; }
 .assign tbody tr:hover td.is-owner { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
 .modal h2 { font-size: 19px; padding-right: 36px; }
 .detail-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; margin-bottom: 6px; }

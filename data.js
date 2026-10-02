@@ -8,15 +8,15 @@
 window.PORTAL_DATA = {
   "project": {
     "name": "AGV Graduation Project",
-    "subtitle": "Part 1 · Mechanical & Cross-functional Prep (Sep 28 – Nov 15, 2026)",
-    "start": "2026-09-28",
+    "subtitle": "Part 1 · Mechanical & Cross-functional Prep (deadline Nov 15, 2026)",
+    "start": "2026-10-04",
     "end": "2026-11-15",
     "weekendDays": [
       5,
       6
     ],
-    "lastUpdated": "2026-09-30",
-    "announcement": "New plan: Part 1 is now 12 tasks in 4 phases (A → B → C → D). A phase starts only when the previous phase is 100% complete; tasks inside a phase run in parallel. Part 1 must be finished by Sun Nov 15. Electrical and Software parts will be added later.",
+    "lastUpdated": "2026-10-02",
+    "announcement": "Updated plan: Phases A → B → C are the mechanical work (about one week per phase to start with). Phase D starts after the mechanical work and its tasks will be added later. Who works on each task, how many people and the exact deadlines will be announced on this board.",
     "adminPasscodeHash": "d8249d067e64caeaf6ce5ad4d7e0cdfafe62ca9b35f5bbccb845ccff240a6dd8"
   },
   "github": {
@@ -54,61 +54,61 @@ window.PORTAL_DATA = {
       "id": "M1",
       "label": "Member 1",
       "name": "",
-      "role": "Chassis lead"
+      "role": ""
     },
     {
       "id": "M2",
       "label": "Member 2",
       "name": "",
-      "role": "Chassis structures"
+      "role": ""
     },
     {
       "id": "M3",
       "label": "Member 3",
       "name": "",
-      "role": "Chassis & manufacturing lead"
+      "role": ""
     },
     {
       "id": "M4",
       "label": "Member 4",
       "name": "",
-      "role": "Chassis structures & simulation"
+      "role": ""
     },
     {
       "id": "M5",
       "label": "Member 5",
       "name": "",
-      "role": "Wheels, drive & procurement"
+      "role": ""
     },
     {
       "id": "M6",
       "label": "Member 6",
       "name": "",
-      "role": "Lift mechanism"
+      "role": ""
     },
     {
       "id": "M7",
       "label": "Member 7",
       "name": "",
-      "role": "Lift mechanism lead"
+      "role": ""
     },
     {
       "id": "M8",
       "label": "Member 8",
       "name": "",
-      "role": "Lift, URDF & simulation"
+      "role": ""
     },
     {
       "id": "M9",
       "label": "Member 9",
       "name": "",
-      "role": "Cover, assembly & URDF"
+      "role": ""
     },
     {
       "id": "M10",
       "label": "Member 10",
       "name": "",
-      "role": "Cover, procurement & electrical"
+      "role": ""
     }
   ],
   "categories": [
@@ -135,7 +135,8 @@ window.PORTAL_DATA = {
       "hue": "blue",
       "short": "Phase A · Design",
       "gated": false,
-      "title": "Phase A: CAD design of chassis, wheels, lift (DFM) and sheet-metal cover"
+      "title": "Phase A: CAD design of chassis, wheels, lift (DFM) and sheet-metal cover",
+      "folder": "Phase-A_design"
     },
     {
       "id": "B",
@@ -143,7 +144,8 @@ window.PORTAL_DATA = {
       "hue": "purple",
       "short": "Phase B · Integration & Analysis",
       "gated": true,
-      "title": "Phase B: full assembly, stress and modal analysis, purchase list"
+      "title": "Phase B: full assembly, stress and modal analysis, purchase list",
+      "folder": "Phase-B_integration-and-analysis"
     },
     {
       "id": "C",
@@ -151,15 +153,17 @@ window.PORTAL_DATA = {
       "hue": "amber",
       "short": "Phase C · Manufacturing & URDF",
       "gated": true,
-      "title": "Phase C: manufacturing and assembly of chassis and mechanisms; URDF from CAD"
+      "title": "Phase C: manufacturing and assembly of chassis and mechanisms; URDF from CAD",
+      "folder": "Phase-C_manufacturing-and-urdf"
     },
     {
       "id": "D",
       "category": "P1",
       "hue": "green",
-      "short": "Phase D · Electrical & Simulation Prep",
+      "short": "Phase D · After Mechanical",
       "gated": true,
-      "title": "Phase D: electrical components on the chassis; simulation of the new car"
+      "title": "Phase D: starts after the mechanical work is done. Tasks will be added here later (electrical integration, simulation, …).",
+      "folder": "Phase-D_electrical-and-simulation-prep"
     }
   ],
   "phases": [
@@ -168,8 +172,8 @@ window.PORTAL_DATA = {
       "group": "A",
       "weeks": "Phase A",
       "title": "Design (CAD)",
-      "start": "2026-09-28",
-      "end": "2026-10-14",
+      "start": "2026-10-04",
+      "end": "2026-10-10",
       "hue": "blue",
       "goals": [
         "Chassis, sheet-metal cover and lift CAD ready for manufacturing",
@@ -181,8 +185,8 @@ window.PORTAL_DATA = {
       "group": "B",
       "weeks": "Phase B",
       "title": "Integration & Analysis",
-      "start": "2026-10-15",
-      "end": "2026-10-25",
+      "start": "2026-10-11",
+      "end": "2026-10-17",
       "hue": "purple",
       "goals": [
         "Chassis + lift assembled in CAD without interferences",
@@ -195,8 +199,8 @@ window.PORTAL_DATA = {
       "group": "C",
       "weeks": "Phase C",
       "title": "Manufacturing & URDF",
-      "start": "2026-10-26",
-      "end": "2026-11-08",
+      "start": "2026-10-18",
+      "end": "2026-10-24",
       "hue": "amber",
       "goals": [
         "Materials bought; chassis and lift manufactured and assembled",
@@ -207,46 +211,44 @@ window.PORTAL_DATA = {
       "id": "PD",
       "group": "D",
       "weeks": "Phase D",
-      "title": "Electrical & Simulation Prep",
-      "start": "2026-11-09",
+      "title": "After Mechanical (tasks to be added)",
+      "start": "2026-10-25",
       "end": "2026-11-15",
       "hue": "green",
       "goals": [
-        "Electrical components tested, wired and fixed to the chassis",
-        "Simulation updated for the new car (differential drive, new mass/dimensions)"
+        "Starts when Phase C is 100% complete",
+        "Tasks will be added by the team leader"
       ]
     }
   ],
   "milestones": [
     {
       "id": "Gate A",
-      "date": "2026-10-14",
+      "phase": "A",
+      "date": "2026-10-10",
       "title": "Phase A 100% complete → Phase B unlocks"
     },
     {
       "id": "Gate B",
-      "date": "2026-10-25",
+      "phase": "B",
+      "date": "2026-10-17",
       "title": "Phase B 100% complete → Phase C unlocks"
     },
     {
       "id": "Gate C",
-      "date": "2026-11-08",
-      "title": "Phase C 100% complete → Phase D unlocks"
+      "phase": "C",
+      "date": "2026-10-24",
+      "title": "Mechanical work complete → Phase D unlocks"
     },
     {
       "id": "Part 1",
       "date": "2026-11-15",
-      "title": "Part 1 (Mechanical & Prep) complete"
+      "title": "Part 1 deadline"
     }
   ],
   "tasks": [
     {
-      "assignees": [
-        "M1",
-        "M2",
-        "M3",
-        "M4"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Full SolidWorks model of the new chassis: aluminum-extrusion frame (standard profiles, brackets, T-nuts), mounting points for the drive wheels/hoverboard motors, caster, lift base plate, battery and electronics bay, and front/rear LiDAR mounts. Size members for the 100 kg payload case.",
@@ -256,9 +258,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "1",
       "title": "Chassis CAD",
-      "needed": 4,
-      "start": "2026-09-28",
-      "due": "2026-10-14",
+      "needed": 0,
+      "start": "2026-10-04",
+      "due": "2026-10-10",
       "folder": "Phase-A_design/01_chassis-cad",
       "docs": [
         "SolidWorks parts/assembly + STEP export",
@@ -268,9 +270,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M5"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Calculate the required wheel diameter and drive layout: traction and torque for robot + 100 kg payload, target speed, ground clearance, obstacle/threshold height, and alignment of the two drive wheels with the caster (all contact points on one plane, parallel axles). Compare the available hoverboard hub-motor sizes (e.g., 6.5 in, 8 in, 10 in) and recommend one. The result feeds the chassis CAD.",
@@ -280,9 +280,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "2",
       "title": "Wheel alignment calculations to choose the diameter of the wheels used",
-      "needed": 1,
-      "start": "2026-09-28",
-      "due": "2026-10-05",
+      "needed": 0,
+      "start": "2026-10-04",
+      "due": "2026-10-10",
       "folder": "Phase-A_design/02_wheel-diameter-calcs",
       "docs": [
         "Calculation sheet (Excel/PDF) with all assumptions",
@@ -291,11 +291,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M7",
-        "M6",
-        "M8"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Rework the four-scissor lift CAD so local workshops can make it: standard plate/bar thicknesses, laser-cuttable arm profiles, reamed pivot holes with defined tolerances, standard pins/bearings/bushings, bolted instead of welded joints where possible, and fewer unique parts. Keep the proven geometry (arm length, pivot spacing).",
@@ -305,9 +301,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "3",
       "title": "Lifting mechanism CAD edits (Design for Manufacturing)",
-      "needed": 3,
-      "start": "2026-09-28",
-      "due": "2026-10-12",
+      "needed": 0,
+      "start": "2026-10-04",
+      "due": "2026-10-10",
       "folder": "Phase-A_design/03_lift-cad-dfm",
       "docs": [
         "Updated SolidWorks files + STEP",
@@ -316,10 +312,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M9",
-        "M10"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "normal",
       "description": "Design the aluminum sheet-metal cover for all four sides using SolidWorks Sheet Metal: fixing to the extrusion slots, removable access panel(s) for battery/electronics, LiDAR windows, cable pass-throughs and ventilation. Export flat patterns (DXF) with bend lines.",
@@ -329,9 +322,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "4",
       "title": "Sheet metal cover CAD",
-      "needed": 2,
-      "start": "2026-09-28",
-      "due": "2026-10-14",
+      "needed": 0,
+      "start": "2026-10-04",
+      "due": "2026-10-10",
       "folder": "Phase-A_design/04_sheet-metal-cover",
       "docs": [
         "Sheet-metal parts + DXF flat patterns",
@@ -340,10 +333,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M1",
-        "M9"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Mate the chassis, cover, drive wheels and the DFM lift into one top-level assembly. Run interference detection through the full lift stroke, check clearances to wiring and cover, and compute the combined mass properties (mass, CG) for the analyses and the URDF.",
@@ -353,9 +343,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "5",
       "title": "Chassis with mechanism assembly",
-      "needed": 2,
-      "start": "2026-10-15",
-      "due": "2026-10-19",
+      "needed": 0,
+      "start": "2026-10-11",
+      "due": "2026-10-17",
       "folder": "Phase-B_integration-and-analysis/05_chassis-mechanism-assembly",
       "docs": [
         "Top-level assembly + STEP",
@@ -365,11 +355,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M2",
-        "M3",
-        "M4"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Static FEA of the chassis under the 100 kg payload (with dynamic factor) applied through the lift mounts, supported at the drive wheels and caster. Report von Mises stress, safety factor (target ≥ 1.5) and max deflection; propose reinforcement where needed.",
@@ -379,9 +365,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "6",
       "title": "Chassis stress analysis",
-      "needed": 3,
-      "start": "2026-10-15",
-      "due": "2026-10-25",
+      "needed": 0,
+      "start": "2026-10-11",
+      "due": "2026-10-17",
       "folder": "Phase-B_integration-and-analysis/06_chassis-stress-analysis",
       "docs": [
         "FEA study files",
@@ -390,11 +376,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M6",
-        "M7",
-        "M8"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Frequency (modal) analysis of the lift mechanism, raised and lowered, to find its natural frequencies and mode shapes. Check they stay well away from excitation sources (motor/drive speeds, floor vibration while driving) and stiffen the design if a mode is too low.",
@@ -404,9 +386,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "7",
       "title": "Mechanisms' modal analysis",
-      "needed": 3,
-      "start": "2026-10-15",
-      "due": "2026-10-25",
+      "needed": 0,
+      "start": "2026-10-11",
+      "due": "2026-10-17",
       "folder": "Phase-B_integration-and-analysis/07_mechanism-modal-analysis",
       "docs": [
         "Frequency study files",
@@ -415,10 +397,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M5",
-        "M10"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Build the final purchase list from the CAD: aluminum extrusion (profile, total length, cuts), brackets/T-nuts/fasteners, bearings, wheels and caster, hoverboard motors, sheets and lift stock. For each item: spec, quantity, 2–3 suppliers with price (EGP) and lead time. Get budget approval so ordering starts on day 1 of Phase C.",
@@ -428,9 +407,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "8",
       "title": "Purchase list (Al extrusion, Bearing, Wheels, Hoverboard motors)",
-      "needed": 2,
-      "start": "2026-10-15",
-      "due": "2026-10-22",
+      "needed": 0,
+      "start": "2026-10-11",
+      "due": "2026-10-17",
       "folder": "Phase-B_integration-and-analysis/08_purchase-list",
       "docs": [
         "Purchase list (Excel/PDF)",
@@ -439,16 +418,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M3",
-        "M1",
-        "M2",
-        "M4",
-        "M5",
-        "M6",
-        "M7",
-        "M10"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "high",
       "description": "Order everything on the purchase list, then manufacture and assemble: cut and drill extrusions, laser-cut and bend sheets, machine lift parts, assemble the frame, drive wheels and caster, lift and cover. Check first-off parts against drawings and finish with a basic mechanical test (rolling, lift stroke, 100 kg static load).",
@@ -458,9 +428,9 @@ window.PORTAL_DATA = {
       "group": "C",
       "code": "9",
       "title": "Chassis and mechanisms' manufacturing",
-      "needed": 8,
-      "start": "2026-10-26",
-      "due": "2026-11-08",
+      "needed": 0,
+      "start": "2026-10-18",
+      "due": "2026-10-24",
       "folder": "Phase-C_manufacturing-and-urdf/09_manufacturing",
       "docs": [
         "Receipts/invoices",
@@ -470,10 +440,7 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [
-        "M8",
-        "M9"
-      ],
+      "assignees": [],
       "status": "todo",
       "priority": "normal",
       "description": "Export the final assembly to URDF (SolidWorks to URDF exporter): correct link frames, joint axes and limits (drive wheels, caster, lift), masses and inertias from CAD, and simplified collision meshes. Check it loads in RViz/Gazebo and hand it to the software team (it replaces the old mecanum model).",
@@ -483,69 +450,14 @@ window.PORTAL_DATA = {
       "group": "C",
       "code": "10",
       "title": "CAD's URDF",
-      "needed": 2,
-      "start": "2026-10-26",
-      "due": "2026-11-04",
+      "needed": 0,
+      "start": "2026-10-18",
+      "due": "2026-10-24",
       "folder": "Phase-C_manufacturing-and-urdf/10_cad-urdf",
       "docs": [
         "URDF + meshes + config",
         "Screenshot in RViz/Gazebo",
         "README: frames, joints, how to launch"
-      ]
-    },
-    {
-      "assignees": [
-        "M10",
-        "M1",
-        "M2",
-        "M3",
-        "M5",
-        "M6"
-      ],
-      "status": "todo",
-      "priority": "high",
-      "description": "Bench-test each electrical component (hoverboard motors + drivers, battery/BMS, controllers, sensors), then mount them on the chassis at the planned points, route and fix the wiring (separate power and logic), and check everything powers up safely.",
-      "deliverable": "Components mounted and wired + test checklist",
-      "docLink": "",
-      "id": "p1-11",
-      "group": "D",
-      "code": "11",
-      "title": "Electric components testing, connecting, and fixing to the chassis",
-      "needed": 6,
-      "start": "2026-11-09",
-      "due": "2026-11-15",
-      "folder": "Phase-D_electrical-and-simulation-prep/11_electrical-integration",
-      "docs": [
-        "Test checklist per component",
-        "Wiring photos / diagram",
-        "README: issues and fixes"
-      ]
-    },
-    {
-      "assignees": [
-        "M4",
-        "M7",
-        "M8",
-        "M9"
-      ],
-      "status": "todo",
-      "priority": "high",
-      "description": "Update the simulation for the new car: differential-drive kinematics instead of mecanum, new wheel diameter, mass and inertia from the URDF, and the lift model. Recalculate speed/acceleration limits and implement the changes in the Gazebo/ROS setup so the software team can continue.",
-      "deliverable": "Updated simulation running the new car + calculation notes",
-      "docLink": "",
-      "id": "p1-12",
-      "group": "D",
-      "code": "12",
-      "title": "New car simulation calculations and implementation",
-      "needed": 4,
-      "start": "2026-11-09",
-      "due": "2026-11-15",
-      "folder": "Phase-D_electrical-and-simulation-prep/12_new-car-simulation",
-      "docs": [
-        "Calculation notes",
-        "Changed config/launch files (or a link to the software repo commit)",
-        "Screenshot/video of the simulation",
-        "README: what changed"
       ]
     }
   ],
@@ -1360,6 +1272,66 @@ window.PORTAL_DATA = {
         "folder": "T7_lift-fabrication/7.6_mechanical-test-report-and-hand-over",
         "needed": 2
       }
-    ]
+    ],
+    "removedFromPart1": {
+      "note": "Original Phase D tasks, removed 2026-10-02: Phase D starts after the mechanical work and gets new tasks later.",
+      "tasks": [
+        {
+          "assignees": [
+            "M10",
+            "M1",
+            "M2",
+            "M3",
+            "M5",
+            "M6"
+          ],
+          "status": "todo",
+          "priority": "high",
+          "description": "Bench-test each electrical component (hoverboard motors + drivers, battery/BMS, controllers, sensors), then mount them on the chassis at the planned points, route and fix the wiring (separate power and logic), and check everything powers up safely.",
+          "deliverable": "Components mounted and wired + test checklist",
+          "docLink": "",
+          "id": "p1-11",
+          "group": "D",
+          "code": "11",
+          "title": "Electric components testing, connecting, and fixing to the chassis",
+          "needed": 6,
+          "start": "2026-11-09",
+          "due": "2026-11-15",
+          "folder": "Phase-D_electrical-and-simulation-prep/11_electrical-integration",
+          "docs": [
+            "Test checklist per component",
+            "Wiring photos / diagram",
+            "README: issues and fixes"
+          ]
+        },
+        {
+          "assignees": [
+            "M4",
+            "M7",
+            "M8",
+            "M9"
+          ],
+          "status": "todo",
+          "priority": "high",
+          "description": "Update the simulation for the new car: differential-drive kinematics instead of mecanum, new wheel diameter, mass and inertia from the URDF, and the lift model. Recalculate speed/acceleration limits and implement the changes in the Gazebo/ROS setup so the software team can continue.",
+          "deliverable": "Updated simulation running the new car + calculation notes",
+          "docLink": "",
+          "id": "p1-12",
+          "group": "D",
+          "code": "12",
+          "title": "New car simulation calculations and implementation",
+          "needed": 4,
+          "start": "2026-11-09",
+          "due": "2026-11-15",
+          "folder": "Phase-D_electrical-and-simulation-prep/12_new-car-simulation",
+          "docs": [
+            "Calculation notes",
+            "Changed config/launch files (or a link to the software repo commit)",
+            "Screenshot/video of the simulation",
+            "README: what changed"
+          ]
+        }
+      ]
+    }
   }
 };

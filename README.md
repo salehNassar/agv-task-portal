@@ -13,35 +13,25 @@ A lightweight static web portal (HTML + CSS + JS, no build step, no server): **T
 
 ## Scope: Part 1 of the project
 
-The board currently holds **Part 1 · Mechanical & Cross-functional Prep** (Sep 28 – **Sun Nov 15, 2026**): mechanical design, manufacturing and the mechanical preparation for the electrical and software teams (CAD, URDF, mounting points). **Part 2 (Electrical)** and **Part 3 (Software)** are already listed as placeholders on the timeline and will be appended later as new categories with their own phases.
+The board currently holds **Part 1 · Mechanical & Cross-functional Prep** (deadline **Sun Nov 15, 2026**): mechanical design, manufacturing and the mechanical preparation for the electrical and software teams (CAD, URDF, mounting points). **Part 2 (Electrical)** and **Part 3 (Software)** are already listed as placeholders on the timeline and will be appended later as new categories with their own phases.
 
 ### Rules
 - **Waterfall phases A → B → C → D.** A phase is locked (🔒) until every task of the previous phase is Done. The portal enforces this: tasks in a locked phase cannot be moved to In Progress or Done. Tasks inside a phase run in parallel.
-- **All 10 members work in every phase.** Each phase distributes Member 1–10 across its tasks (each member on exactly one task per phase). The first member listed on a task is its owner.
+- **Phase D starts after the mechanical work (A–C).** It is empty for now; the team leader adds its tasks later (**+ New task** → Phase D). New tasks continue the numbering (Task 11, 12, …) and get their own GitHub folder automatically on the first upload.
+- **The team leader decides who, how many and when.** In admin mode, **Plan & assign** shows every task with: who works on it (first ticked = owner), how many people it needs (0 = not decided), and its start and deadline. A warning appears if a phase is planned to start before the previous one ends.
+- **Phases and gates follow the tasks.** A phase spans its tasks' earliest start to latest deadline, and each gate sits at the end of its phase, so moving a deadline moves the phase and its gate automatically.
 - **Everyone sees everything.** The site is public and read-only; filters only highlight, they never hide tasks from anyone.
 
-### Schedule
+### Starting plan (editable)
 
-| Task | Phase | Start → Deadline | Duration | Assignees |
-|---|---|---|---|---|
-| 1. Chassis CAD | A | Mon Sep 28 → **Wed Oct 14** | 17 days | 4 members: [M1, M2, M3, M4] |
-| 2. Wheel alignment calculations to choose the wheel diameter | A | Mon Sep 28 → **Mon Oct 5** | 8 days | 1 member: [M5] |
-| 3. Lifting mechanism CAD edits (DFM) | A | Mon Sep 28 → **Mon Oct 12** | 15 days | 3 members: [M7, M6, M8] |
-| 4. Sheet metal cover CAD | A | Mon Sep 28 → **Wed Oct 14** | 17 days | 2 members: [M9, M10] |
-| **Gate A** | | **Wed Oct 14**: Phase A 100% complete → Phase B unlocks | | |
-| 5. Chassis with mechanism assembly | B | Thu Oct 15 → **Mon Oct 19** | 5 days | 2 members: [M1, M9] |
-| 6. Chassis stress analysis | B | Thu Oct 15 → **Sun Oct 25** | 11 days | 3 members: [M2, M3, M4] |
-| 7. Mechanisms' modal analysis | B | Thu Oct 15 → **Sun Oct 25** | 11 days | 3 members: [M6, M7, M8] |
-| 8. Purchase list (Al extrusion, bearings, wheels, hoverboard motors) | B | Thu Oct 15 → **Thu Oct 22** | 8 days | 2 members: [M5, M10] |
-| **Gate B** | | **Sun Oct 25**: Phase B 100% complete → Phase C unlocks | | |
-| 9. Chassis and mechanisms' manufacturing | C | Mon Oct 26 → **Sun Nov 8** | 14 days | 8 members: [M3, M1, M2, M4, M5, M6, M7, M10] |
-| 10. CAD's URDF | C | Mon Oct 26 → **Wed Nov 4** | 10 days | 2 members: [M8, M9] |
-| **Gate C** | | **Sun Nov 8**: Phase C 100% complete → Phase D unlocks | | |
-| 11. Electric components testing, connecting, and fixing to the chassis | D | Mon Nov 9 → **Sun Nov 15** | 7 days | 6 members: [M10, M1, M2, M3, M5, M6] |
-| 12. New car simulation calculations and implementation | D | Mon Nov 9 → **Sun Nov 15** | 7 days | 4 members: [M4, M7, M8, M9] |
-| **Part 1 done** | | **Sun Nov 15** | | |
+| Phase | Tasks | Planned dates |
+|---|---|---|
+| A · Design | 1 Chassis CAD · 2 Wheel alignment calculations (wheel diameter) · 3 Lift CAD edits (DFM) · 4 Sheet metal cover CAD | Sun Oct 4 → Sat Oct 10 |
+| B · Integration & Analysis | 5 Chassis + mechanism assembly · 6 Chassis stress analysis · 7 Mechanisms' modal analysis · 8 Purchase list | Sun Oct 11 → Sat Oct 17 |
+| C · Manufacturing & URDF | 9 Chassis and mechanisms' manufacturing · 10 CAD's URDF | Sun Oct 18 → Sat Oct 24 |
+| D · After Mechanical | Tasks to be added | from Oct 25 (Part 1 deadline Nov 15) |
 
-The team leader can change assignees, head-counts and dates in admin mode (**Assign tasks** grid / **Edit task**) and maps real people to Member 1–10 on the **Team** tab. The earlier 35-task plan is archived inside `data.js` (`"archive"`) and in the mechanical repo's `archive/plan-v1/` folder.
+Every task starts at about one week, with no assignees and no head-count. The live board is the source of truth for dates and assignments. Earlier versions of the plan are archived inside `data.js` (`"archive"`) and in the mechanical repo's `archive/` folder.
 
 ## How it works
 

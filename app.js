@@ -89,7 +89,8 @@
     d.phases = d.phases || [];
     d.milestones = d.milestones || [];
     d.tasks = (d.tasks || []).map((t) => Object.assign({ assignees: [], status: 'todo', priority: 'normal', description: '', deliverable: '', docLink: '' }, t));
-    d.tasks.forEach((t) => { if (!(t.needed >= 1)) t.needed = Math.max(1, t.assignees.length); });
+    // needed = head-count the leader wants; 0 = not decided yet (missing values fall back to the assignee count)
+    d.tasks.forEach((t) => { t.needed = Number.isFinite(t.needed) && t.needed >= 0 ? Math.floor(t.needed) : t.assignees.length; });
     d.roster = d.roster || [];
     d.github = Object.assign({ orgName: '', orgUrl: '', uploadUrl: '', folderRoot: 'Mechanical', rule: '', repos: [], steps: [], readmeTemplate: '' }, d.github || {});
     return d;
@@ -108,6 +109,9 @@
   function taskFolder(t) {
     if (t.folder) return t.folder;
     const g = groupById(t.group);
+    // Phases have a fixed repo folder (e.g. "Phase-D_…"); new tasks get "13_task-title" inside it.
+    // GitHub creates the folder on the first upload.
+    if (g.folder) return g.folder + '/' + (/^\d+$/.test(String(t.code)) ? String(t.code).padStart(2, '0') : t.code) + '_' + slug(t.title);
     return [data.github.folderRoot, g.id + '_' + slug(g.short || g.title), t.code + '_' + slug(t.title)].filter(Boolean).join('/');
   }
   // Documentation state of a task: documented (has a GitHub link), missing (done/overdue without one), or "document as you go".
@@ -204,6 +208,31 @@
   }
   const taskLock = (t) => lockedBy(groupById(t.group));
 
+  // Phase bands and gate dates follow the tasks: a phase spans its tasks' earliest start to latest deadline,
+  // so editing a deadline moves the phase and its gate automatically. An empty phase (e.g. tasks still to be
+  // added) starts the day after the previous phase and keeps its stored end date as a placeholder.
+  function livePhases() {
+    const out = [];
+    data.phases.forEach((ph) => {
+      const ts = ph.group ? data.tasks.filter((t) => t.group === ph.group) : [];
+      const p = Object.assign({}, ph);
+      if (ts.length) {
+        p.start = ts.reduce((m, t) => (t.start < m ? t.start : m), ts[0].start);
+        p.end = ts.reduce((m, t) => (t.due > m ? t.due : m), ts[0].due);
+      } else if (ph.group && out.length) {
+        p.start = addDays(out[out.length - 1].end, 1);
+        if (!(p.end >= p.start)) p.end = addDays(p.start, 6);
+      }
+      p.empty = !!ph.group && !ts.length;
+      out.push(p);
+    });
+    return out;
+  }
+  function liveMilestones() {
+    const byGroup = new Map(livePhases().filter((p) => p.group && !p.empty).map((p) => [p.group, p.end]));
+    return data.milestones.map((m) => (m.phase && byGroup.has(m.phase)) ? Object.assign({}, m, { date: byGroup.get(m.phase) }) : m);
+  }
+
   // Numeric codes are shown as "T1"; dotted codes ("1.2") stay as they are.
   const codeLabel = (t) => /^\d+$/.test(String(t.code)) ? 'T' + t.code : String(t.code);
   function codeKey(code) { return String(code).split('.').map((n) => String(parseInt(n, 10) || 0).padStart(4, '0')).join('.'); }
@@ -275,7 +304,7 @@
     const pct = scope.length ? Math.round((done / scope.length) * 100) : 0;
     const weekEnd = addDays(TODAY, 6);
     const dueWeek = scope.filter((t) => t.status !== 'done' && t.due >= TODAY && t.due <= weekEnd).length;
-    const nextMs = data.milestones.slice().sort((a, b) => a.date.localeCompare(b.date)).find((m) => m.date >= TODAY);
+    const nextMs = liveMilestones().slice().sort((a, b) => a.date.localeCompare(b.date)).find((m) => m.date >= TODAY);
     const p = data.project;
     const totalDays = diffDays(p.start, p.end) + 1;
     const elapsed = Math.min(totalDays, Math.max(0, diffDays(p.start, TODAY) + 1));
@@ -320,7 +349,7 @@
         ? '<span class="dirty">● Unpublished changes</span> (saved in this browser only). Export data.js and upload it to GitHub to publish.'
         : 'In sync with the published version.') + '</span>' +
       '<button class="btn btn-primary btn-sm" data-act="new">+ New task</button>' +
-      '<button class="btn btn-primary btn-sm" data-act="assign">Assign tasks</button>' +
+      '<button class="btn btn-primary btn-sm" data-act="assign">Plan &amp; assign</button>' +
       '<button class="btn btn-sm" data-act="export">Export data.js</button>' +
       '<button class="btn btn-sm" data-act="import">Import…</button>' +
       '<button class="btn btn-sm" data-act="settings">Project settings</button>' +
@@ -414,6 +443,7 @@
 
   // "👥 2 members" badge; admins also see how many seats are still empty.
   function neededBadge(t) {
+    if (!t.needed) return isAdmin ? '<span class="badge info" title="Set the head-count in Plan &amp; assign">👥 count not set</span>' : '';
     const missing = t.needed - t.assignees.length;
     if (isAdmin && missing > 0) return '<span class="badge soon" title="Members needed for this task">👥 ' + missing + ' more needed</span>';
     return '<span class="badge info" title="Members needed for this task">👥 ' + t.needed + ' member' + (t.needed === 1 ? '' : 's') + '</span>';
@@ -485,7 +515,10 @@
   // ---------------------------------------------------------------- timeline (Gantt)
   function renderTimeline(tasks) {
     const p = data.project;
-    const start = p.start, days = diffDays(p.start, p.end) + 1;
+    const PH = livePhases();
+    const allDates = [p.start].concat(PH.map((x) => x.start), data.tasks.map((t) => t.start)).filter(isValidISO).sort();
+    const allEnds = [p.end].concat(PH.map((x) => x.end), data.tasks.map((t) => t.due)).filter(isValidISO).sort();
+    const start = allDates[0], end = allEnds[allEnds.length - 1], days = diffDays(start, end) + 1;
     const narrow = window.innerWidth < 700;
     const dayW = narrow ? 24 : 30;
     const labelW = narrow ? 150 : 300;
@@ -497,7 +530,7 @@
 
     // header: phases
     let h = '<div class="g-row g-head"><div class="g-label">Phase</div><div class="g-track">' +
-      data.phases.map((ph) => '<div class="g-phase hue-' + esc(ph.hue || 'blue') + '" style="left:' + (x(ph.start) + 2) + 'px;width:' + (span(ph.start, ph.end) - 4) + 'px" title="' + esc(ph.weeks + ': ' + ph.title + ' (' + fmtShort(ph.start) + ' – ' + fmtShort(ph.end) + ')') + '">' + esc(ph.weeks + ' · ' + ph.title) + '</div>').join('') +
+      livePhases().map((ph) => '<div class="g-phase hue-' + esc(ph.hue || 'blue') + '" style="left:' + (x(ph.start) + 2) + 'px;width:' + (span(ph.start, ph.end) - 4) + 'px" title="' + esc(ph.weeks + ': ' + ph.title + ' (' + fmtShort(ph.start) + ' – ' + fmtShort(ph.end) + ')') + '">' + esc(ph.weeks + ' · ' + ph.title) + '</div>').join('') +
       '</div></div>';
 
     // header: days
@@ -513,7 +546,7 @@
 
     // header: milestones
     h += '<div class="g-row g-head g-ms-row"><div class="g-label">Milestones</div><div class="g-track">' +
-      data.milestones.map((m) => '<div class="g-ms" style="left:' + (x(m.date) + dayW) + 'px" title="' + esc(m.id + ' · ' + fmtLong(m.date) + ' · ' + m.title) + '"><span>' + esc(m.id) + '</span></div>').join('') +
+      liveMilestones().map((m) => '<div class="g-ms" style="left:' + (x(m.date) + dayW) + 'px" title="' + esc(m.id + ' · ' + fmtLong(m.date) + ' · ' + m.title) + '"><span>' + esc(m.id) + '</span></div>').join('') +
       '</div></div>';
 
     // body
@@ -541,6 +574,10 @@
           '<div class="g-label"><span class="caret">▾</span><span class="t" title="' + esc(g.title + ' · ' + ps.text) + '">' + esc(g.short || g.title) + '</span><span class="pct" title="' + esc(ps.text) + '">' + (ps.id === 'locked' ? '🔒 ' : ps.id === 'done' ? '✓ ' : '') + pct + '%</span></div>' +
           '<div class="g-track">' + sum + '</div></div>';
         if (collapsed) return;
+        if (!all.length) {
+          body += '<div class="g-row g-task g-future hue-' + esc(hueOfGroup(g)) + '"><div class="g-label"><span class="t">Tasks will be added here later</span></div><div class="g-track"></div></div>';
+          return;
+        }
         (filtering ? shown : all).forEach((t) => {
           const due = dueInfo(t);
           const late = !!(due && due.late);
@@ -559,9 +596,9 @@
     // overlay: weekends, phase boundaries, milestone lines, today line
     let ov = '';
     for (let i = 0; i < days; i++) if (weekend.includes(parseDate(addDays(start, i)).getDay())) ov += '<div class="we" style="left:' + (i * dayW) + 'px"></div>';
-    data.phases.slice(1).forEach((ph) => { ov += '<div class="phase-line" style="left:' + x(ph.start) + 'px"></div>'; });
-    data.milestones.forEach((m) => { ov += '<div class="ms-line" style="left:' + (x(m.date) + dayW) + 'px"></div>'; });
-    if (TODAY >= start && TODAY <= p.end) ov += '<div class="today-line" style="left:' + (x(TODAY) + dayW / 2 - 1) + 'px"></div>';
+    livePhases().slice(1).forEach((ph) => { ov += '<div class="phase-line" style="left:' + x(ph.start) + 'px"></div>'; });
+    liveMilestones().forEach((m) => { ov += '<div class="ms-line" style="left:' + (x(m.date) + dayW) + 'px"></div>'; });
+    if (TODAY >= start && TODAY <= end) ov += '<div class="today-line" style="left:' + (x(TODAY) + dayW / 2 - 1) + 'px"></div>';
 
     const legend = '<div class="gantt-legend">' +
       '<span><i class="sw" style="background:color-mix(in srgb,var(--todo) 22%,var(--surface));box-shadow:inset 0 0 0 1px var(--todo)"></i>To Do</span>' +
@@ -578,7 +615,7 @@
 
   function milestoneList() {
     return '<div class="phase-card"><div class="phase-head hue-rose"><span class="wk">Milestones</span><h2>Key deadlines</h2></div><div class="table-wrap"><table class="sched"><thead><tr><th>ID</th><th>Deadline</th><th>Milestone</th><th>Days left</th></tr></thead><tbody>' +
-      data.milestones.slice().sort((a, b) => a.date.localeCompare(b.date)).map((m) => {
+      liveMilestones().slice().sort((a, b) => a.date.localeCompare(b.date)).map((m) => {
         const d = diffDays(TODAY, m.date);
         return '<tr style="cursor:default"><td class="code" style="--c:var(--danger)">' + esc(m.id) + '</td><td class="date deadline">' + esc(fmtLong(m.date)) + '</td><td>' + esc(m.title) + '</td><td class="tnum">' + (d < 0 ? '<span class="badge info">passed</span>' : d === 0 ? '<span class="badge soon">today</span>' : d) + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
@@ -595,22 +632,22 @@
 
   // ---------------------------------------------------------------- weekly schedule
   function renderSchedule(tasks) {
-    const phases = data.phases;
-    const inPhase = (t, ph) => t.due >= ph.start && t.due <= ph.end;
+    const phases = livePhases();
+    const inPhase = (t, ph) => ph.group ? t.group === ph.group : (t.due >= ph.start && t.due <= ph.end);
     const orphan = tasks.filter((t) => !phases.some((ph) => inPhase(t, ph)));
     let html = '<div class="gantt-legend"><span>Tasks are listed under the phase in which their <b>deadline</b> falls.</span><span class="spacer"><button class="btn btn-sm" type="button" data-act="print">Print / Save as PDF</button></span></div>';
     phases.forEach((ph) => {
       const list = tasks.filter((t) => inPhase(t, ph)).sort((a, b) => a.due.localeCompare(b.due) || codeKey(a.code).localeCompare(codeKey(b.code)));
-      const ms = data.milestones.filter((m) => m.date >= ph.start && m.date <= ph.end);
+      const ms = liveMilestones().filter((m) => m.date >= ph.start && m.date <= ph.end);
       const pg = ph.group ? data.groups.find((g) => g.id === ph.group) : null;
       const ps = pg ? phaseState(pg) : null;
       const gate = pg && pg.gated && prevGroup(pg)
         ? '<div class="gate-note"><span class="badge ' + (ps.id === 'locked' ? 'late' : ps.id === 'done' ? 'ok' : 'info') + '">' + esc(ps.text) + '</span> Starts only when ' + esc((prevGroup(pg).short || prevGroup(pg).id).split('·')[0].trim()) + ' is 100% complete. Tasks inside this phase run in parallel.</div>'
         : (ps ? '<div class="gate-note"><span class="badge ' + (ps.id === 'done' ? 'ok' : 'info') + '">' + esc(ps.text) + '</span> First phase. Tasks run in parallel.</div>' : '');
-      html += '<section class="phase-card"><div class="phase-head hue-' + esc(ph.hue || 'blue') + '"><span class="wk">' + esc(ph.weeks) + '</span><h2>' + esc(ph.title) + '</h2><span class="range">' + esc(fmtDay(ph.start)) + ' – ' + esc(fmtDay(ph.end)) + ' · ' + (diffDays(ph.start, ph.end) + 1) + ' days</span></div>' + gate +
+      html += '<section class="phase-card"><div class="phase-head hue-' + esc(ph.hue || 'blue') + '"><span class="wk">' + esc(ph.weeks) + '</span><h2>' + esc(ph.title) + '</h2><span class="range">' + (ph.empty ? 'From ' + esc(fmtDay(ph.start)) + ' · dates set when tasks are added' : esc(fmtDay(ph.start)) + ' – ' + esc(fmtDay(ph.end)) + ' · ' + (diffDays(ph.start, ph.end) + 1) + ' days') + '</span></div>' + gate +
         (ph.goals && ph.goals.length ? '<ul class="phase-goals">' + ph.goals.map((g) => '<li>' + esc(g) + '</li>').join('') + '</ul>' : '') +
         ms.map((m) => '<div class="ms-note">' + esc(m.id) + ' · ' + esc(fmtDay(m.date)) + ': ' + esc(m.title) + '</div>').join('') +
-        scheduleTable(list) + '</section>';
+        (ph.empty ? '<div class="table-wrap"><p class="muted" style="padding:12px 16px">Tasks for this phase will be added later.</p></div>' : scheduleTable(list)) + '</section>';
     });
     if (orphan.length) html += '<section class="phase-card"><div class="phase-head"><span class="wk">Outside phases</span><h2>Other tasks</h2></div>' + scheduleTable(orphan) + '</section>';
     return html;
@@ -622,7 +659,7 @@
       list.map((t) => {
         const due = dueInfo(t);
         return '<tr class="hue-' + esc(hueOfTask(t)) + '" data-open="' + esc(t.id) + '"><td class="code">' + esc(codeLabel(t)) + '</td><td>' + esc(t.title) + '<div class="small muted">' + esc(groupById(t.group).short || '') + (t.deliverable ? ' · ' + esc(t.deliverable) : '') + '</div></td>' +
-          '<td><div class="who">' + chips(t.assignees) + '</div><div class="small muted" style="margin-top:3px">👥 ' + t.needed + ' needed</div></td><td class="date">' + esc(fmtDay(t.start)) + '</td><td class="date deadline">' + esc(fmtDay(t.due)) + '</td>' +
+          '<td><div class="who">' + chips(t.assignees) + '</div>' + (t.needed ? '<div class="small muted" style="margin-top:3px">👥 ' + t.needed + ' needed</div>' : '') + '</td><td class="date">' + esc(fmtDay(t.start)) + '</td><td class="date deadline">' + esc(fmtDay(t.due)) + '</td>' +
           '<td><span class="pill"><span class="dot st-' + esc(t.status) + '"></span>' + STATUS_LABEL[t.status] + '</span>' + (due && t.status !== 'done' ? ' <span class="badge ' + due.cls + '">' + esc(due.text) + '</span>' : '') +
           (docInfo(t) ? ' <span class="badge ' + docInfo(t).cls + '">' + ghMini + esc(docInfo(t).text) + '</span>' : '') + '</td></tr>';
       }).join('') + '</tbody></table></div>';
@@ -696,7 +733,7 @@
       '<div class="detail-grid"><div><div class="k">Start</div><div class="v">' + esc(fmtDay(t.start)) + '</div></div><div><div class="k">Deadline</div><div class="v">' + esc(fmtDay(t.due)) + '</div></div><div><div class="k">Estimated duration</div><div class="v">' + esc(durationText(t)) + '</div></div></div>' +
       (t.description ? '<div class="detail-sec"><h4>What to do</h4><p>' + esc(t.description) + '</p></div>' : '') +
       (t.deliverable ? '<div class="detail-sec"><h4>Deliverable</h4><p>' + esc(t.deliverable) + '</p></div>' : '') +
-      '<div class="detail-sec"><h4>Assigned to · 👥 ' + t.assignees.length + ' of ' + t.needed + ' needed</h4><div class="people">' + (t.assignees.length ? t.assignees.map((mid, i) => {
+      '<div class="detail-sec"><h4>Assigned to' + (t.needed ? ' · 👥 ' + t.assignees.length + ' of ' + t.needed + ' needed' : '') + '</h4><div class="people">' + (t.assignees.length ? t.assignees.map((mid, i) => {
         const m = memberById(mid);
         return '<div class="person"><span class="chip' + (state.member === mid ? ' me' : '') + '">' + esc(m.id) + '</span><b>' + esc(memberName(m)) + '</b>' + (i === 0 ? '<span class="badge info">owner</span>' : '') + '<span class="role">' + esc(m.role || '') + '</span></div>';
       }).join('') : '<span class="muted">Unassigned</span>') + '</div></div>' +
@@ -716,68 +753,93 @@
       '</div>');
   }
 
-  // Admin: assign every task in one grid (rows = tasks, columns = members). First assignee = owner.
+  // Admin: plan every task in one grid: who works on it (first = owner), how many people it needs,
+  // and its start/deadline. Nothing is changed until "Save plan".
   function openAssign() {
     const tag = (m) => m.name ? memberShort(m) : '#' + (String(m.label || m.id).replace(/\D/g, '') || m.id); // compact column label
     const work = new Map(data.tasks.map((t) => [t.id, t.assignees.slice()]));
     const need = new Map(data.tasks.map((t) => [t.id, t.needed]));
+    const dates = new Map(data.tasks.map((t) => [t.id, { start: t.start, due: t.due }]));
     const ms = data.members;
+    const cols = ms.length + 5;
     let rows = '';
     data.groups.forEach((g) => {
       const ts = sortedTasks().filter((t) => t.group === g.id);
-      if (!ts.length) return;
-      rows += '<tr class="grp-row hue-' + esc(catById(g.category).hue) + '"><th colspan="' + (ms.length + 3) + '">' + esc(g.id + ' · ' + (g.short || g.title)) + '</th></tr>';
+      rows += '<tr class="grp-row hue-' + esc(hueOfGroup(g)) + '"><th colspan="' + cols + '">' + esc(g.short || g.title) +
+        (ts.length ? '' : ' <span class="muted" style="text-transform:none;font-weight:500">· no tasks yet (add them with + New task)</span>') +
+        '<span class="plan-warn" data-warn="' + esc(g.id) + '"></span></th></tr>';
       ts.forEach((t) => {
-        rows += '<tr data-task="' + esc(t.id) + '"><td class="t hue-' + esc(hueOfTask(t)) + '"><b class="code">' + esc(codeLabel(t)) + '</b> ' + esc(t.title) + '<div class="small muted">due ' + esc(fmtShort(t.due)) + '</div></td>' +
+        rows += '<tr data-task="' + esc(t.id) + '"><td class="t hue-' + esc(hueOfTask(t)) + '"><b class="code">' + esc(codeLabel(t)) + '</b> ' + esc(t.title) + '</td>' +
           ms.map((m) => '<td><input type="checkbox" data-m="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + ' aria-label="Assign ' + esc(codeLabel(t)) + ' to ' + esc(memberName(m)) + '"></td>').join('') +
-          '<td class="need"><input type="number" data-needed min="1" max="' + ms.length + '" value="' + esc(t.needed) + '" aria-label="Members needed for ' + esc(codeLabel(t)) + '"><span data-gap></span></td>' +
-          '<td><select data-owner aria-label="Owner of ' + esc(codeLabel(t)) + '"></select></td></tr>';
+          '<td class="need"><input type="number" data-needed min="0" max="' + ms.length + '" value="' + esc(t.needed) + '" aria-label="Members needed for ' + esc(codeLabel(t)) + '"><span data-gap></span></td>' +
+          '<td><select data-owner aria-label="Owner of ' + esc(codeLabel(t)) + '"></select></td>' +
+          '<td class="date-cell"><input type="date" data-date="start" value="' + esc(t.start) + '" aria-label="Start of ' + esc(codeLabel(t)) + '"></td>' +
+          '<td class="date-cell"><input type="date" data-date="due" value="' + esc(t.due) + '" aria-label="Deadline of ' + esc(codeLabel(t)) + '"><div class="small muted" data-dur></div></td></tr>';
       });
     });
-    openModal('<h2 id="modalTitle">Assign tasks</h2>' +
-      '<p class="muted small" style="margin-top:4px">Tick who works on each task. The <b>owner</b> is responsible for the deadline and the GitHub upload. Nothing changes until you click Save; then Export data.js to publish.</p>' +
+    openModal('<h2 id="modalTitle">Plan &amp; assign</h2>' +
+      '<p class="muted small" style="margin-top:4px">Tick who works on each task (first ticked = <b>owner</b>, responsible for the deadline and the GitHub upload), set how many people it needs (0 = not decided) and its dates. Nothing changes until you click Save; then Export data.js to publish.</p>' +
       '<div class="assign-wrap"><table class="assign"><thead><tr><th class="t">Task</th>' +
-      ms.map((m) => '<th title="' + esc(memberName(m)) + '">' + esc(tag(m)) + '</th>').join('') + '<th>Needed</th><th>Owner</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody><tfoot><tr><th class="t">Tasks per person</th>' + ms.map((m) => '<td data-load="' + esc(m.id) + '"></td>').join('') + '<td data-need-total></td><td></td></tr></tfoot></table></div>' +
-      '<div class="modal-actions"><button class="btn left" type="button" id="assignClear">Clear all</button><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" type="button" id="assignSave">Save assignments</button></div>', true);
+      ms.map((m) => '<th title="' + esc(memberName(m)) + '">' + esc(tag(m)) + '</th>').join('') + '<th>Needed</th><th>Owner</th><th>Start</th><th>Deadline</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody><tfoot><tr><th class="t">Tasks per person</th>' + ms.map((m) => '<td data-load="' + esc(m.id) + '"></td>').join('') + '<td data-need-total></td><td></td><td></td><td></td></tr></tfoot></table></div>' +
+      '<div class="form-error" id="formError" hidden style="margin-top:10px"></div>' +
+      '<div class="modal-actions"><button class="btn left" type="button" id="assignClear">Clear people</button><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" type="button" id="assignSave">Save plan</button></div>', true);
 
     const table = $('.assign', modalBody);
     const refreshRow = (tr) => {
-      const arr = work.get(tr.dataset.task), sel = $('[data-owner]', tr);
-      sel.innerHTML = arr.length ? arr.map((id) => '<option value="' + esc(id) + '">' + esc(tag(memberById(id))) + '</option>').join('') : '<option value="">—</option>';
+      const id = tr.dataset.task, arr = work.get(id), n = need.get(id), sel = $('[data-owner]', tr);
+      sel.innerHTML = arr.length ? arr.map((mid) => '<option value="' + esc(mid) + '">' + esc(tag(memberById(mid))) + '</option>').join('') : '<option value="">—</option>';
       sel.disabled = !arr.length;
       if (arr.length) sel.value = arr[0];
       $$('input[data-m]', tr).forEach((cb) => { cb.checked = arr.includes(cb.dataset.m); cb.parentElement.classList.toggle('is-owner', cb.dataset.m === arr[0]); });
-      const gap = need.get(tr.dataset.task) - arr.length, gapEl = $('[data-gap]', tr);
-      gapEl.textContent = gap === 0 ? '✓' : gap > 0 ? gap + ' short' : (-gap) + ' extra';
-      gapEl.className = 'gap ' + (gap === 0 ? 'ok' : 'off');
+      const gapEl = $('[data-gap]', tr), gap = n - arr.length;
+      if (!n) { gapEl.textContent = 'not set'; gapEl.className = 'gap muted'; }
+      else { gapEl.textContent = gap === 0 ? '✓' : gap > 0 ? gap + ' short' : (-gap) + ' extra'; gapEl.className = 'gap ' + (gap === 0 ? 'ok' : 'off'); }
+      const dt = dates.get(id), ok = isValidISO(dt.start) && isValidISO(dt.due) && dt.due >= dt.start;
+      $('[data-dur]', tr).textContent = ok ? (diffDays(dt.start, dt.due) + 1) + ' days' : 'check dates';
+      $('[data-dur]', tr).classList.toggle('bad', !ok);
     };
-    const refreshLoad = () => ms.forEach((m) => {
+    const refreshLoad = () => {
       const all = Array.from(work.values());
-      const n = all.filter((a) => a.includes(m.id)).length, own = all.filter((a) => a[0] === m.id).length;
-      $('[data-load="' + m.id + '"]', table).innerHTML = '<b>' + n + '</b>' + (own ? '<div class="small muted">' + own + ' own</div>' : '');
-      const seats = Array.from(need.values()).reduce((a, b) => a + b, 0);
-      const filled = Array.from(work.entries()).reduce((a, e) => a + Math.min(e[1].length, need.get(e[0])), 0);
-      $('[data-need-total]', table).innerHTML = '<b>' + filled + '/' + seats + '</b><div class="small muted">seats filled</div>';
-    });
+      ms.forEach((m) => {
+        const n = all.filter((a) => a.includes(m.id)).length, own = all.filter((a) => a[0] === m.id).length;
+        $('[data-load="' + m.id + '"]', table).innerHTML = '<b>' + n + '</b>' + (own ? '<div class="small muted">' + own + ' own</div>' : '');
+      });
+      const set = Array.from(need.entries()).filter((e) => e[1] > 0);
+      const seats = set.reduce((a, e) => a + e[1], 0);
+      const filled = set.reduce((a, e) => a + Math.min(work.get(e[0]).length, e[1]), 0);
+      $('[data-need-total]', table).innerHTML = seats ? '<b>' + filled + '/' + seats + '</b><div class="small muted">seats filled</div>' : '<span class="small muted">no counts set</span>';
+      // Waterfall check on the planned dates: a gated phase should start after the previous phase's last deadline.
+      data.groups.forEach((g) => {
+        const el = $('[data-warn="' + g.id + '"]', table), prev = prevGroup(g);
+        if (!el) return;
+        const own = data.tasks.filter((t) => t.group === g.id).map((t) => dates.get(t.id).start).filter(isValidISO).sort();
+        const before = prev ? data.tasks.filter((t) => t.group === prev.id).map((t) => dates.get(t.id).due).filter(isValidISO).sort() : [];
+        const clash = g.gated && own.length && before.length && own[0] <= before[before.length - 1];
+        el.textContent = clash ? '⚠ planned to start ' + fmtShort(own[0]) + ', but ' + (prev.short || prev.id).split('·')[0].trim() + ' ends ' + fmtShort(before[before.length - 1]) : '';
+      });
+    };
     $$('tr[data-task]', table).forEach(refreshRow);
     refreshLoad();
 
     table.addEventListener('change', (e) => {
       const tr = e.target.closest('tr[data-task]');
       if (!tr) return;
-      let arr = work.get(tr.dataset.task);
+      const id = tr.dataset.task;
+      let arr = work.get(id);
       if (e.target.matches('input[data-m]')) {
-        arr = arr.filter((id) => id !== e.target.dataset.m);
+        arr = arr.filter((mid) => mid !== e.target.dataset.m);
         if (e.target.checked) arr.push(e.target.dataset.m);
       } else if (e.target.matches('[data-owner]') && e.target.value) {
-        arr = [e.target.value].concat(arr.filter((id) => id !== e.target.value));
+        arr = [e.target.value].concat(arr.filter((mid) => mid !== e.target.value));
       } else if (e.target.matches('[data-needed]')) {
-        const v = Math.min(ms.length, Math.max(1, parseInt(e.target.value, 10) || 1));
+        const v = Math.min(ms.length, Math.max(0, parseInt(e.target.value, 10) || 0));
         e.target.value = v;
-        need.set(tr.dataset.task, v);
+        need.set(id, v);
+      } else if (e.target.matches('[data-date]')) {
+        dates.get(id)[e.target.dataset.date] = e.target.value;
       }
-      work.set(tr.dataset.task, arr);
+      work.set(id, arr);
       refreshRow(tr);
       refreshLoad();
     });
@@ -787,13 +849,22 @@
       refreshLoad();
     });
     $('#assignSave').addEventListener('click', () => {
+      const bad = data.tasks.filter((t) => { const dt = dates.get(t.id); return !(isValidISO(dt.start) && isValidISO(dt.due) && dt.due >= dt.start); });
+      if (bad.length) {
+        const el = $('#formError');
+        el.textContent = 'Fix the dates of ' + bad.map(codeLabel).join(', ') + ': the deadline must be on or after the start.';
+        el.hidden = false;
+        return;
+      }
       let changed = 0;
       data.tasks.forEach((t) => {
-        const next = work.get(t.id) || [], n = need.get(t.id) || 1;
-        if (next.join() !== t.assignees.join() || n !== t.needed) { t.assignees = next; t.needed = n; changed++; }
+        const next = work.get(t.id) || [], n = need.get(t.id) || 0, dt = dates.get(t.id);
+        if (next.join() !== t.assignees.join() || n !== t.needed || dt.start !== t.start || dt.due !== t.due) {
+          t.assignees = next; t.needed = n; t.start = dt.start; t.due = dt.due; changed++;
+        }
       });
       closeModal();
-      if (changed) commit('Assignments saved for ' + changed + ' task' + (changed === 1 ? '' : 's'));
+      if (changed) commit('Plan saved for ' + changed + ' task' + (changed === 1 ? '' : 's'));
       else toast('No changes');
     });
   }
@@ -814,7 +885,7 @@
     const t = existing ? clone(existing) : Object.assign({
       id: '', group: g0, code: nextCode(g0), title: '', description: '', deliverable: '',
       assignees: state.member !== 'all' ? [state.member] : [], start: TODAY < data.project.start ? data.project.start : TODAY,
-      due: addDays(TODAY < data.project.start ? data.project.start : TODAY, 6), status: 'todo', priority: 'normal', needed: 1
+      due: addDays(TODAY < data.project.start ? data.project.start : TODAY, 6), status: 'todo', priority: 'normal', needed: 0
     }, template || {});
     openModal('<h2 id="modalTitle">' + (existing ? 'Edit task ' + esc(codeLabel(t)) : 'New task') + '</h2>' +
       '<form class="form" id="taskForm" novalidate>' +
@@ -828,7 +899,7 @@
       '<label>Deadline<input type="date" name="due" value="' + esc(t.due) + '" required></label>' +
       '<label>Status<select name="status">' + STATUSES.map((s) => '<option value="' + s.id + '"' + (s.id === t.status ? ' selected' : '') + '>' + s.label + '</option>').join('') + '</select></label>' +
       '<label>Priority<select name="priority">' + Object.keys(PRIORITY_LABEL).map((k) => '<option value="' + k + '"' + (k === t.priority ? ' selected' : '') + '>' + PRIORITY_LABEL[k] + '</option>').join('') + '</select></label>' +
-      '<label>Members needed<input type="number" name="needed" min="1" max="' + data.members.length + '" value="' + esc(t.needed || 1) + '"></label>' +
+      '<label>Members needed <span style="font-weight:400">(0 = not decided)</span><input type="number" name="needed" min="0" max="' + data.members.length + '" value="' + esc(t.needed || 0) + '"></label>' +
       '<div class="full"><div class="small muted" style="font-weight:600;margin-bottom:4px">Assigned to <span style="font-weight:400">(first ticked = owner)</span></div><div class="assignee-picker">' +
       data.members.map((m) => '<label title="' + esc(memberName(m) + (m.role ? ' · ' + m.role : '')) + '"><input type="checkbox" name="assignees" value="' + esc(m.id) + '"' + (t.assignees.includes(m.id) ? ' checked' : '') + '>' + esc(memberShort(m)) + '</label>').join('') +
       '</div><div class="small muted" id="ownerHint" style="margin-top:4px"></div></div>' +
@@ -856,7 +927,7 @@
         group: f.group.value, code: f.code.value.trim(), title: f.title.value.trim(),
         description: f.description.value.trim(), deliverable: f.deliverable.value.trim(), docLink: f.docLink.value.trim(),
         assignees: order.slice(), start: f.start.value, due: f.due.value, status: f.status.value, priority: f.priority.value,
-        needed: Math.min(data.members.length, Math.max(1, parseInt(f.needed.value, 10) || 1))
+        needed: Math.min(data.members.length, Math.max(0, parseInt(f.needed.value, 10) || 0))
       };
       const err = !rec.title ? 'Title is required.' : !rec.code ? 'Code is required.' :
         rec.docLink && !safeUrl(rec.docLink) ? 'GitHub link must start with https://' :
