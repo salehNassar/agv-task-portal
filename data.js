@@ -9,7 +9,7 @@ window.PORTAL_DATA = {
   "project": {
     "name": "AGV Graduation Project",
     "subtitle": "Part 1 · Mechanical & Cross-functional Prep (deadline Nov 15, 2026)",
-    "start": "2026-10-04",
+    "start": "2026-10-05",
     "end": "2026-11-15",
     "weekendDays": [
       5,
@@ -172,8 +172,8 @@ window.PORTAL_DATA = {
       "group": "A",
       "weeks": "Phase A",
       "title": "Design (CAD)",
-      "start": "2026-10-04",
-      "end": "2026-10-10",
+      "start": "2026-10-05",
+      "end": "2026-10-11",
       "hue": "blue",
       "goals": [
         "Chassis, sheet-metal cover and lift CAD ready for manufacturing",
@@ -185,8 +185,8 @@ window.PORTAL_DATA = {
       "group": "B",
       "weeks": "Phase B",
       "title": "Integration & Analysis",
-      "start": "2026-10-11",
-      "end": "2026-10-17",
+      "start": "2026-10-12",
+      "end": "2026-10-18",
       "hue": "purple",
       "goals": [
         "Chassis + lift assembled in CAD without interferences",
@@ -199,8 +199,8 @@ window.PORTAL_DATA = {
       "group": "C",
       "weeks": "Phase C",
       "title": "Manufacturing & URDF",
-      "start": "2026-10-18",
-      "end": "2026-10-24",
+      "start": "2026-10-19",
+      "end": "2026-10-25",
       "hue": "amber",
       "goals": [
         "Materials bought; chassis and lift manufactured and assembled",
@@ -212,7 +212,7 @@ window.PORTAL_DATA = {
       "group": "D",
       "weeks": "Phase D",
       "title": "After Mechanical (tasks to be added)",
-      "start": "2026-10-25",
+      "start": "2026-10-26",
       "end": "2026-11-15",
       "hue": "green",
       "goals": [
@@ -225,19 +225,19 @@ window.PORTAL_DATA = {
     {
       "id": "Gate A",
       "phase": "A",
-      "date": "2026-10-10",
+      "date": "2026-10-11",
       "title": "Phase A 100% complete → Phase B unlocks"
     },
     {
       "id": "Gate B",
       "phase": "B",
-      "date": "2026-10-17",
+      "date": "2026-10-18",
       "title": "Phase B 100% complete → Phase C unlocks"
     },
     {
       "id": "Gate C",
       "phase": "C",
-      "date": "2026-10-24",
+      "date": "2026-10-25",
       "title": "Mechanical work complete → Phase D unlocks"
     },
     {
@@ -259,8 +259,8 @@ window.PORTAL_DATA = {
       "code": "1",
       "title": "Chassis CAD",
       "needed": 0,
-      "start": "2026-10-04",
-      "due": "2026-10-10",
+      "start": "2026-10-05",
+      "due": "2026-10-11",
       "folder": "Phase-A_design/01_chassis-cad",
       "docs": [
         "SolidWorks parts/assembly + STEP export",
@@ -281,8 +281,8 @@ window.PORTAL_DATA = {
       "code": "2",
       "title": "Wheel alignment calculations to choose the diameter of the wheels used",
       "needed": 0,
-      "start": "2026-10-04",
-      "due": "2026-10-10",
+      "start": "2026-10-05",
+      "due": "2026-10-11",
       "folder": "Phase-A_design/02_wheel-diameter-calcs",
       "docs": [
         "Calculation sheet (Excel/PDF) with all assumptions",
@@ -302,8 +302,8 @@ window.PORTAL_DATA = {
       "code": "3",
       "title": "Lifting mechanism CAD edits (Design for Manufacturing)",
       "needed": 0,
-      "start": "2026-10-04",
-      "due": "2026-10-10",
+      "start": "2026-10-05",
+      "due": "2026-10-11",
       "folder": "Phase-A_design/03_lift-cad-dfm",
       "docs": [
         "Updated SolidWorks files + STEP",
@@ -323,8 +323,8 @@ window.PORTAL_DATA = {
       "code": "4",
       "title": "Sheet metal cover CAD",
       "needed": 0,
-      "start": "2026-10-04",
-      "due": "2026-10-10",
+      "start": "2026-10-05",
+      "due": "2026-10-11",
       "folder": "Phase-A_design/04_sheet-metal-cover",
       "docs": [
         "Sheet-metal parts + DXF flat patterns",
@@ -344,8 +344,8 @@ window.PORTAL_DATA = {
       "code": "5",
       "title": "Chassis with mechanism assembly",
       "needed": 0,
-      "start": "2026-10-11",
-      "due": "2026-10-17",
+      "start": "2026-10-12",
+      "due": "2026-10-18",
       "folder": "Phase-B_integration-and-analysis/05_chassis-mechanism-assembly",
       "docs": [
         "Top-level assembly + STEP",
@@ -366,8 +366,8 @@ window.PORTAL_DATA = {
       "code": "6",
       "title": "Chassis stress analysis",
       "needed": 0,
-      "start": "2026-10-11",
-      "due": "2026-10-17",
+      "start": "2026-10-12",
+      "due": "2026-10-18",
       "folder": "Phase-B_integration-and-analysis/06_chassis-stress-analysis",
       "docs": [
         "FEA study files",
@@ -387,8 +387,8 @@ window.PORTAL_DATA = {
       "code": "7",
       "title": "Mechanisms' modal analysis",
       "needed": 0,
-      "start": "2026-10-11",
-      "due": "2026-10-17",
+      "start": "2026-10-12",
+      "due": "2026-10-18",
       "folder": "Phase-B_integration-and-analysis/07_mechanism-modal-analysis",
       "docs": [
         "Frequency study files",
@@ -408,8 +408,8 @@ window.PORTAL_DATA = {
       "code": "8",
       "title": "Purchase list (Al extrusion, Bearing, Wheels, Hoverboard motors)",
       "needed": 0,
-      "start": "2026-10-11",
-      "due": "2026-10-17",
+      "start": "2026-10-12",
+      "due": "2026-10-18",
       "folder": "Phase-B_integration-and-analysis/08_purchase-list",
       "docs": [
         "Purchase list (Excel/PDF)",
@@ -429,8 +429,8 @@ window.PORTAL_DATA = {
       "code": "9",
       "title": "Chassis and mechanisms' manufacturing",
       "needed": 0,
-      "start": "2026-10-18",
-      "due": "2026-10-24",
+      "start": "2026-10-19",
+      "due": "2026-10-25",
       "folder": "Phase-C_manufacturing-and-urdf/09_manufacturing",
       "docs": [
         "Receipts/invoices",
@@ -451,8 +451,8 @@ window.PORTAL_DATA = {
       "code": "10",
       "title": "CAD's URDF",
       "needed": 0,
-      "start": "2026-10-18",
-      "due": "2026-10-24",
+      "start": "2026-10-19",
+      "due": "2026-10-25",
       "folder": "Phase-C_manufacturing-and-urdf/10_cad-urdf",
       "docs": [
         "URDF + meshes + config",

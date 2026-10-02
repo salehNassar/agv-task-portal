@@ -321,7 +321,8 @@
       currentPhaseStat(doing, dueWeek) +
       '<div class="stat' + (late ? ' alert' : '') + '"><div class="k">Overdue</div><div class="v">' + late + '</div><div class="sub">' + (late ? 'needs attention' : 'nothing overdue') + '</div></div>' +
       '<div class="stat">' + msHtml + '</div>' +
-      '<div class="stat" style="grid-column:1/-1;padding:8px 14px"><div class="k">Timeline · day ' + elapsed + ' of ' + totalDays + ' (' + esc(fmtShort(p.start)) + ' → ' + esc(fmtShort(p.end)) + ')</div><div class="progress"><i style="width:' + Math.round((elapsed / totalDays) * 100) + '%;background:var(--accent)"></i></div></div>';
+      '<div class="stat" style="grid-column:1/-1;padding:8px 14px"><div class="k">Timeline · ' +
+      (TODAY < p.start ? 'starts ' + esc(fmtDay(p.start)) + ' (in ' + diffDays(TODAY, p.start) + ' day' + (diffDays(TODAY, p.start) === 1 ? '' : 's') + '), ' + totalDays + ' days' : 'day ' + elapsed + ' of ' + totalDays) + ' (' + esc(fmtShort(p.start)) + ' → ' + esc(fmtShort(p.end)) + ')</div><div class="progress"><i style="width:' + Math.round((elapsed / totalDays) * 100) + '%;background:var(--accent)"></i></div></div>';
   }
 
   // The first gated phase that is not complete; falls back to the old "in progress" card when there are no phases.

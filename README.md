@@ -26,10 +26,10 @@ The board currently holds **Part 1 · Mechanical & Cross-functional Prep** (dead
 
 | Phase | Tasks | Planned dates |
 |---|---|---|
-| A · Design | 1 Chassis CAD · 2 Wheel alignment calculations (wheel diameter) · 3 Lift CAD edits (DFM) · 4 Sheet metal cover CAD | Sun Oct 4 → Sat Oct 10 |
-| B · Integration & Analysis | 5 Chassis + mechanism assembly · 6 Chassis stress analysis · 7 Mechanisms' modal analysis · 8 Purchase list | Sun Oct 11 → Sat Oct 17 |
-| C · Manufacturing & URDF | 9 Chassis and mechanisms' manufacturing · 10 CAD's URDF | Sun Oct 18 → Sat Oct 24 |
-| D · After Mechanical | Tasks to be added | from Oct 25 (Part 1 deadline Nov 15) |
+| A · Design | 1 Chassis CAD · 2 Wheel alignment calculations (wheel diameter) · 3 Lift CAD edits (DFM) · 4 Sheet metal cover CAD | Mon Oct 5 → Sun Oct 11 |
+| B · Integration & Analysis | 5 Chassis + mechanism assembly · 6 Chassis stress analysis · 7 Mechanisms' modal analysis · 8 Purchase list | Mon Oct 12 → Sun Oct 18 |
+| C · Manufacturing & URDF | 9 Chassis and mechanisms' manufacturing · 10 CAD's URDF | Mon Oct 19 → Sun Oct 25 |
+| D · After Mechanical | Tasks to be added | from Oct 26 (Part 1 deadline Nov 15) |
 
 Every task starts at about one week, with no assignees and no head-count. The live board is the source of truth for dates and assignments. Earlier versions of the plan are archived inside `data.js` (`"archive"`) and in the mechanical repo's `archive/` folder.
 
