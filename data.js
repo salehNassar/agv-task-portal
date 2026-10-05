@@ -297,7 +297,7 @@ window.PORTAL_DATA = {
     },
     {
       "assignees": [
-        "M4",
+        "M6",
         "M5"
       ],
       "status": "todo",
@@ -321,7 +321,7 @@ window.PORTAL_DATA = {
     },
     {
       "assignees": [
-        "M6"
+        "M4"
       ],
       "status": "todo",
       "priority": "normal",
