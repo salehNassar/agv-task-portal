@@ -53,61 +53,61 @@ window.PORTAL_DATA = {
     {
       "id": "M1",
       "label": "Member 1",
-      "name": "",
+      "name": "Yasmin Mohamed",
       "role": ""
     },
     {
       "id": "M2",
       "label": "Member 2",
-      "name": "",
+      "name": "Basmala Mohamed",
       "role": ""
     },
     {
       "id": "M3",
       "label": "Member 3",
-      "name": "",
+      "name": "Saleh Nassar",
       "role": ""
     },
     {
       "id": "M4",
       "label": "Member 4",
-      "name": "",
+      "name": "Ahmed Ismail",
       "role": ""
     },
     {
       "id": "M5",
       "label": "Member 5",
-      "name": "",
+      "name": "Omar Farahat",
       "role": ""
     },
     {
       "id": "M6",
       "label": "Member 6",
-      "name": "",
+      "name": "Ahmed Loay",
       "role": ""
     },
     {
       "id": "M7",
       "label": "Member 7",
-      "name": "",
+      "name": "Nada Mostafa",
       "role": ""
     },
     {
       "id": "M8",
       "label": "Member 8",
-      "name": "",
+      "name": "Nadine Elframawy",
       "role": ""
     },
     {
       "id": "M9",
       "label": "Member 9",
-      "name": "",
+      "name": "Basant Salah",
       "role": ""
     },
     {
       "id": "M10",
       "label": "Member 10",
-      "name": "",
+      "name": "Youssef Wahba",
       "role": ""
     }
   ],
@@ -482,14 +482,14 @@ window.PORTAL_DATA = {
   "roster": [
     "Yasmin Mohamed",
     "Basmala Mohamed",
-    "Ahmed Alattar",
-    "Youssef Wahba",
-    "Nada Ali",
-    "Ahmed Elbrolosy",
     "Saleh Nassar",
+    "Ahmed Ismail",
+    "Omar Farahat",
+    "Ahmed Loay",
+    "Nada Mostafa",
     "Nadine Elframawy",
     "Basant Salah",
-    "Omar Farahat"
+    "Youssef Wahba"
   ],
   "archive": {
     "note": "Plan v1 (35 fragmented sub-tasks), archived 2026-09-30 when the board moved to the 12-task phased plan.",
