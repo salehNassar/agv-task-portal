@@ -9,13 +9,13 @@ window.PORTAL_DATA = {
   "project": {
     "name": "AGV Graduation Project",
     "subtitle": "Part 1 · Mechanical & Cross-functional Prep (deadline Nov 15, 2026)",
-    "start": "2026-10-05",
+    "start": "2026-10-06",
     "end": "2026-11-15",
     "weekendDays": [
       5,
       6
     ],
-    "lastUpdated": "2026-10-02",
+    "lastUpdated": "2026-10-06",
     "announcement": "Updated plan: Phases A → B → C are the mechanical work (about one week per phase to start with). Phase D starts after the mechanical work and its tasks will be added later. Who works on each task, how many people and the exact deadlines will be announced on this board.",
     "adminPasscodeHash": "d8249d067e64caeaf6ce5ad4d7e0cdfafe62ca9b35f5bbccb845ccff240a6dd8"
   },
@@ -172,8 +172,8 @@ window.PORTAL_DATA = {
       "group": "A",
       "weeks": "Phase A",
       "title": "Design (CAD)",
-      "start": "2026-10-05",
-      "end": "2026-10-11",
+      "start": "2026-10-06",
+      "end": "2026-10-14",
       "hue": "blue",
       "goals": [
         "Chassis, sheet-metal cover and lift CAD ready for manufacturing",
@@ -185,8 +185,8 @@ window.PORTAL_DATA = {
       "group": "B",
       "weeks": "Phase B",
       "title": "Integration & Analysis",
-      "start": "2026-10-12",
-      "end": "2026-10-18",
+      "start": "2026-10-15",
+      "end": "2026-10-25",
       "hue": "purple",
       "goals": [
         "Chassis + lift assembled in CAD without interferences",
@@ -199,8 +199,8 @@ window.PORTAL_DATA = {
       "group": "C",
       "weeks": "Phase C",
       "title": "Manufacturing & URDF",
-      "start": "2026-10-19",
-      "end": "2026-10-25",
+      "start": "2026-10-26",
+      "end": "2026-11-08",
       "hue": "amber",
       "goals": [
         "Materials bought; chassis and lift manufactured and assembled",
@@ -212,7 +212,7 @@ window.PORTAL_DATA = {
       "group": "D",
       "weeks": "Phase D",
       "title": "After Mechanical (tasks to be added)",
-      "start": "2026-10-26",
+      "start": "2026-11-09",
       "end": "2026-11-15",
       "hue": "green",
       "goals": [
@@ -225,19 +225,19 @@ window.PORTAL_DATA = {
     {
       "id": "Gate A",
       "phase": "A",
-      "date": "2026-10-11",
+      "date": "2026-10-14",
       "title": "Phase A 100% complete → Phase B unlocks"
     },
     {
       "id": "Gate B",
       "phase": "B",
-      "date": "2026-10-18",
+      "date": "2026-10-25",
       "title": "Phase B 100% complete → Phase C unlocks"
     },
     {
       "id": "Gate C",
       "phase": "C",
-      "date": "2026-10-25",
+      "date": "2026-11-08",
       "title": "Mechanical work complete → Phase D unlocks"
     },
     {
@@ -248,7 +248,10 @@ window.PORTAL_DATA = {
   ],
   "tasks": [
     {
-      "assignees": [],
+      "assignees": [
+        "M1",
+        "M2"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Full SolidWorks model of the new chassis: aluminum-extrusion frame (standard profiles, brackets, T-nuts), mounting points for the drive wheels/hoverboard motors, caster, lift base plate, battery and electronics bay, and front/rear LiDAR mounts. Size members for the 100 kg payload case.",
@@ -258,9 +261,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "1",
       "title": "Chassis CAD",
-      "needed": 0,
-      "start": "2026-10-05",
-      "due": "2026-10-11",
+      "needed": 2,
+      "start": "2026-10-06",
+      "due": "2026-10-09",
       "folder": "Phase-A_design/01_chassis-cad",
       "docs": [
         "SolidWorks parts/assembly + STEP export",
@@ -270,7 +273,9 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M3"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Calculate the required wheel diameter and drive layout: traction and torque for robot + 100 kg payload, target speed, ground clearance, obstacle/threshold height, and alignment of the two drive wheels with the caster (all contact points on one plane, parallel axles). Compare the available hoverboard hub-motor sizes (e.g., 6.5 in, 8 in, 10 in) and recommend one. The result feeds the chassis CAD.",
@@ -280,9 +285,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "2",
       "title": "Wheel alignment calculations to choose the diameter of the wheels used",
-      "needed": 0,
-      "start": "2026-10-05",
-      "due": "2026-10-11",
+      "needed": 1,
+      "start": "2026-10-06",
+      "due": "2026-10-08",
       "folder": "Phase-A_design/02_wheel-diameter-calcs",
       "docs": [
         "Calculation sheet (Excel/PDF) with all assumptions",
@@ -291,7 +296,10 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M4",
+        "M5"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Rework the four-scissor lift CAD so local workshops can make it: standard plate/bar thicknesses, laser-cuttable arm profiles, reamed pivot holes with defined tolerances, standard pins/bearings/bushings, bolted instead of welded joints where possible, and fewer unique parts. Keep the proven geometry (arm length, pivot spacing).",
@@ -301,9 +309,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "3",
       "title": "Lifting mechanism CAD edits (Design for Manufacturing)",
-      "needed": 0,
-      "start": "2026-10-05",
-      "due": "2026-10-11",
+      "needed": 2,
+      "start": "2026-10-12",
+      "due": "2026-10-14",
       "folder": "Phase-A_design/03_lift-cad-dfm",
       "docs": [
         "Updated SolidWorks files + STEP",
@@ -312,7 +320,9 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M6"
+      ],
       "status": "todo",
       "priority": "normal",
       "description": "Design the aluminum sheet-metal cover for all four sides using SolidWorks Sheet Metal: fixing to the extrusion slots, removable access panel(s) for battery/electronics, LiDAR windows, cable pass-throughs and ventilation. Export flat patterns (DXF) with bend lines.",
@@ -322,9 +332,9 @@ window.PORTAL_DATA = {
       "group": "A",
       "code": "4",
       "title": "Sheet metal cover CAD",
-      "needed": 0,
-      "start": "2026-10-05",
-      "due": "2026-10-11",
+      "needed": 1,
+      "start": "2026-10-06",
+      "due": "2026-10-09",
       "folder": "Phase-A_design/04_sheet-metal-cover",
       "docs": [
         "Sheet-metal parts + DXF flat patterns",
@@ -333,7 +343,9 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M7"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Mate the chassis, cover, drive wheels and the DFM lift into one top-level assembly. Run interference detection through the full lift stroke, check clearances to wiring and cover, and compute the combined mass properties (mass, CG) for the analyses and the URDF.",
@@ -343,9 +355,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "5",
       "title": "Chassis with mechanism assembly",
-      "needed": 0,
-      "start": "2026-10-12",
-      "due": "2026-10-18",
+      "needed": 1,
+      "start": "2026-10-15",
+      "due": "2026-10-19",
       "folder": "Phase-B_integration-and-analysis/05_chassis-mechanism-assembly",
       "docs": [
         "Top-level assembly + STEP",
@@ -355,7 +367,9 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M8"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Static FEA of the chassis under the 100 kg payload (with dynamic factor) applied through the lift mounts, supported at the drive wheels and caster. Report von Mises stress, safety factor (target ≥ 1.5) and max deflection; propose reinforcement where needed.",
@@ -365,9 +379,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "6",
       "title": "Chassis stress analysis",
-      "needed": 0,
-      "start": "2026-10-12",
-      "due": "2026-10-18",
+      "needed": 1,
+      "start": "2026-10-15",
+      "due": "2026-10-25",
       "folder": "Phase-B_integration-and-analysis/06_chassis-stress-analysis",
       "docs": [
         "FEA study files",
@@ -376,7 +390,9 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M9"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Frequency (modal) analysis of the lift mechanism, raised and lowered, to find its natural frequencies and mode shapes. Check they stay well away from excitation sources (motor/drive speeds, floor vibration while driving) and stiffen the design if a mode is too low.",
@@ -386,9 +402,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "7",
       "title": "Mechanisms' modal analysis",
-      "needed": 0,
-      "start": "2026-10-12",
-      "due": "2026-10-18",
+      "needed": 1,
+      "start": "2026-10-15",
+      "due": "2026-10-25",
       "folder": "Phase-B_integration-and-analysis/07_mechanism-modal-analysis",
       "docs": [
         "Frequency study files",
@@ -397,7 +413,9 @@ window.PORTAL_DATA = {
       ]
     },
     {
-      "assignees": [],
+      "assignees": [
+        "M10"
+      ],
       "status": "todo",
       "priority": "high",
       "description": "Build the final purchase list from the CAD: aluminum extrusion (profile, total length, cuts), brackets/T-nuts/fasteners, bearings, wheels and caster, hoverboard motors, sheets and lift stock. For each item: spec, quantity, 2–3 suppliers with price (EGP) and lead time. Get budget approval so ordering starts on day 1 of Phase C.",
@@ -407,9 +425,9 @@ window.PORTAL_DATA = {
       "group": "B",
       "code": "8",
       "title": "Purchase list (Al extrusion, Bearing, Wheels, Hoverboard motors)",
-      "needed": 0,
-      "start": "2026-10-12",
-      "due": "2026-10-18",
+      "needed": 1,
+      "start": "2026-10-15",
+      "due": "2026-10-22",
       "folder": "Phase-B_integration-and-analysis/08_purchase-list",
       "docs": [
         "Purchase list (Excel/PDF)",
@@ -429,8 +447,8 @@ window.PORTAL_DATA = {
       "code": "9",
       "title": "Chassis and mechanisms' manufacturing",
       "needed": 0,
-      "start": "2026-10-19",
-      "due": "2026-10-25",
+      "start": "2026-10-26",
+      "due": "2026-11-08",
       "folder": "Phase-C_manufacturing-and-urdf/09_manufacturing",
       "docs": [
         "Receipts/invoices",
@@ -451,8 +469,8 @@ window.PORTAL_DATA = {
       "code": "10",
       "title": "CAD's URDF",
       "needed": 0,
-      "start": "2026-10-19",
-      "due": "2026-10-25",
+      "start": "2026-10-26",
+      "due": "2026-11-04",
       "folder": "Phase-C_manufacturing-and-urdf/10_cad-urdf",
       "docs": [
         "URDF + meshes + config",
